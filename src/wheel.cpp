@@ -18,7 +18,7 @@ void Wheel::rotate(WheelAttachment &wa, int speed)
 {
     if (&wa.servo != &servo_)
     {
-        io_utils::error(settings_.label + ": invalid wheel attachment");
+        io_utils::error("%s: invalid wheel attachment", settings_.label.c_str());
         return;
     }
 
@@ -32,7 +32,7 @@ void Wheel::rotate(WheelAttachment &wa, int speed)
 
     if (pwm < settings_.min_pwm || pwm > settings_.max_pwm)
     {
-        io_utils::error(settings_.label + ": pwm out of bounds: " + std::to_string(pwm));
+        io_utils::error("%s: pwm out of bounds: %d", settings_.label, pwm);
         return;
     }
 

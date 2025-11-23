@@ -5,10 +5,22 @@
 
 namespace io_utils
 {
-    void init(int serial_baud);
+    enum class LogLevel
+    {
+        OFF,
+        ERROR,
+        WARNING,
+        INFO,
+        DEBUG,
+    };
+
+    void init(int serial_baud, LogLevel log_level);
+
     std::string get_string();
     std::optional<std::string> try_get_string();
-    void info(const std::string &msg);
-    void warning(const std::string &msg);
-    void error(const std::string &msg);
+
+    void debug(const char *format, ...);
+    void info(const char *format, ...);
+    void warning(const char *format, ...);
+    void error(const char *format, ...);
 }
