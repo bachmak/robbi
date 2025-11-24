@@ -10,6 +10,7 @@ struct StrongType
     T v;
 
     using Self = StrongType<T, Tag>;
+    using ValueType = T;
 
     friend Self operator+(Self a, Self b) { return Self{a.v + b.v}; }
     friend Self operator-(Self a, Self b) { return Self{a.v - b.v}; }
@@ -30,7 +31,7 @@ struct StrongType
     Self &operator/=(Self b) { return (v /= b.v, *this); }
     Self &operator%=(Self b) { return (v %= b.v, *this); }
 
-    friend Self abs(Self a) { return std::abs(a.v); }
+    friend Self abs(Self a) { return Self{std::abs(a.v)}; }
 };
 
 using Us = std::chrono::microseconds;

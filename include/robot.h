@@ -17,6 +17,9 @@ public:
     void move(Meter target_pos, Meter cur_pos);
     void rotate(Degree target_pos, Degree cur_pos);
 
+    void rotate(Meter left, Meter right, Speed speed);
+    void rotate(Degree left, Degree right, Speed speed);
+
 private:
     Wheels wheels_;
 };

@@ -47,3 +47,64 @@ void Robot::rotate(Degree target_pos, Degree init_pos)
     (void)target_pos;
     (void)init_pos;
 }
+
+void Robot::rotate(Meter left, Meter right, Speed speed)
+{
+    auto left_deg = wheel_utils::to_angle(wheels_.left, left);
+    auto right_deg = wheel_utils::to_angle(wheels_.right, right);
+    rotate(left_deg, right_deg, speed);
+}
+
+void Robot::rotate(Degree target_left, Degree target_right, Speed speed)
+{
+    auto cur_left = Degree{0};
+    auto cur_right = Degree{0};
+
+    auto progress_left = 0.0f;
+    auto progress_right = 0.0f;
+
+    auto w_left = wheels_.left;
+    auto w_right = wheels_.right;
+
+    auto wa_left = w_left.attach();
+    auto wa_right = w_right.attach();
+
+    auto dir_left = Speed{target_left > Degree{0} ? 1 : -1};
+    auto dir_right = Speed{target_right > Degree{0} ? 1 : -1};
+
+    auto speed_left = dir_left * speed;
+    auto speed_right = -(dir_right * speed);
+
+    while (progress_left < 1.0f || progress_right < 1.0f)
+    {
+        io_utils::debug(
+            "progress_left=%f, progress_right=%f",
+            progress_left,
+            progress_right);
+
+        w_left.rotate(wa_left, speed_left);
+        w_right.rotate(wa_right, speed_right);
+
+        cur_left = wheel_utils::get_full_angle(w_left, cur_left);
+        cur_right = wheel_utils::get_full_angle(w_right, cur_right);
+
+        progress_left = (cur_left / target_left).v;
+        progress_right = (cur_right / target_right).v;
+
+        auto diff = abs(progress_left - progress_right);
+
+        constexpr auto p_coeff = 1;
+        if (cur_right < cur_left)
+        {
+            speed_right += Speed{static_cast<Speed::ValueType>(dir_right.v * p_coeff * diff)};
+        }
+
+        if (cur_left < cur_right)
+        {
+            speed_left += Speed{static_cast<Speed::ValueType>(dir_left.v * p_coeff * diff)};
+        }
+    }
+
+    w_left.rotate(wa_left, Speed{0});
+    w_right.rotate(wa_right, Speed{0});
+}
