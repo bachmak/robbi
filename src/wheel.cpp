@@ -6,6 +6,10 @@
 #include <Arduino.h>
 #include <string>
 
+WheelAttachment::WheelAttachment(Servo &servo, Pin pin) : servo(servo) { servo.attach(pin.v); }
+
+WheelAttachment::~WheelAttachment() { servo.detach(); }
+
 Wheel::Wheel(const WheelSettings &settings)
     : settings_(settings), current_speed_(0)
 {

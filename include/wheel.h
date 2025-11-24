@@ -32,8 +32,8 @@ struct WheelSettings
 class WheelAttachment
 {
 public:
-    WheelAttachment(Servo &servo, Pin pin) : servo(servo) { servo.attach(pin.v); }
-    ~WheelAttachment() { servo.detach(); }
+    WheelAttachment(Servo &servo, Pin pin);
+    ~WheelAttachment();
 
     WheelAttachment(const WheelAttachment &) = delete;
     WheelAttachment &operator=(const WheelAttachment &) = delete;
