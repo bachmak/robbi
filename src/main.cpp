@@ -70,9 +70,9 @@ Wheels create_wheels()
   auto left_wheel = []
   {
     auto settings = WheelSettings{};
-    settings.control_pin = 7;
-    settings.feedback_pin = 8;
-    settings.speed_dead_range = 5;
+    settings.control_pin = Pin{7};
+    settings.feedback_pin = Pin{8};
+    settings.speed_dead_range = Speed{1};
     settings.label = "left-wheel";
     return Wheel(settings);
   }();
@@ -82,7 +82,7 @@ Wheels create_wheels()
     auto settings = WheelSettings{};
     settings.control_pin = Pin{5};
     settings.feedback_pin = Pin{6};
-    settings.speed_dead_range = Speed{5};
+    settings.speed_dead_range = Speed{1};
     settings.label = "right-wheel";
     return Wheel(settings);
   }();
