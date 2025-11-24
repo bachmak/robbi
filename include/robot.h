@@ -14,8 +14,8 @@ public:
     Robot(const Wheels &wheels) : wheels_(wheels) {}
 
 public:
-    void move(float distance, float cur_pos);
-    void rotate(float angle, float cur_pos);
+    void move(Meter target_pos, Meter cur_pos);
+    void rotate(Degree target_pos, Degree cur_pos);
 
 private:
     Wheels wheels_;

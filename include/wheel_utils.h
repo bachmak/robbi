@@ -1,15 +1,17 @@
 #pragma once
 
+#include "common.h"
+
 class Wheel;
 class WheelAttachment;
 
 namespace wheel_utils
 {
-    float get_full_angle(const Wheel &w, const float prev_full_angle);
-    float angle_to_distance(const Wheel &w, float angle);
-    float distance_to_angle(const Wheel &w, float distance);
+    Degree get_full_angle(const Wheel &w, Degree prev_full_angle);
+    Meter to_distance(const Wheel &w, Degree angle);
+    Degree to_angle(const Wheel &w, Meter distance);
 
     void stop(Wheel &w, WheelAttachment &wa);
-    void rotate(Wheel &w, WheelAttachment &wa, int speed);
-    void change_speed(Wheel &w, WheelAttachment &wa, int delta_speed);
+    void rotate(Wheel &w, WheelAttachment &wa, Speed speed);
+    void change_speed(Wheel &w, WheelAttachment &wa, Speed delta_speed);
 }

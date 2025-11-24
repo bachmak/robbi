@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common.h"
+
 #include <Servo.h>
 
 #include <chrono>
@@ -7,19 +9,19 @@
 
 struct WheelSettings
 {
-    int control_pin = 0;
-    int feedback_pin = 0;
+    Pin control_pin{0};
+    Pin feedback_pin{0};
 
-    int min_pwm = 40;
-    int stop_pwm = 90;
-    int max_pwm = 150;
+    Pwm min_pwm{40};
+    Pwm stop_pwm{90};
+    Pwm max_pwm{150};
 
-    int speed_dead_range = 5;
+    Speed speed_dead_range{5};
 
-    float circumference = 0.22;
+    Meter circumference{0.22};
 
-    std::chrono::microseconds feedback_pwm_min{1000};
-    std::chrono::microseconds feedback_pwm_max{1200};
+    Us feedback_pwm_min{1000};
+    Us feedback_pwm_max{1200};
 
     float feedback_pwm_duty_cycle_min = 0.029;
     float feedback_pwm_duty_cycle_max = 0.971;
@@ -30,7 +32,7 @@ struct WheelSettings
 class WheelAttachment
 {
 public:
-    WheelAttachment(Servo &servo, int pin) : servo(servo) { servo.attach(pin); }
+    WheelAttachment(Servo &servo, Pin pin) : servo(servo) { servo.attach(pin.v); }
     ~WheelAttachment() { servo.detach(); }
 
     WheelAttachment(const WheelAttachment &) = delete;
@@ -47,16 +49,16 @@ public:
     explicit Wheel(const WheelSettings &settings);
 
 public:
-    float circumference() const { return settings_.circumference; }
-    int current_speed() const { return current_speed_; }
+    Meter circumference() const { return settings_.circumference; }
+    Speed current_speed() const { return current_speed_; }
 
     WheelAttachment attach() { return WheelAttachment(servo_, settings_.control_pin); }
 
-    void rotate(WheelAttachment &wa, int speed);
-    float read_angle() const;
+    void rotate(WheelAttachment &wa, Speed speed);
+    Degree read_angle() const;
 
 private:
     Servo servo_;
     WheelSettings settings_;
-    int current_speed_;
+    Speed current_speed_;
 };

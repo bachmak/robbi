@@ -6,20 +6,23 @@
 
 namespace wheel_utils
 {
-    float get_full_angle(const Wheel &wheel, const float prev_full_angle)
+    Degree get_full_angle(const Wheel &wheel, const Degree prev_full_angle)
     {
-        const auto prev_angle = fmod(prev_full_angle, 360.0);
+        const auto prev_angle = Degree{fmod(prev_full_angle.v, 360.0)};
         const auto curr_angle = wheel.read_angle();
 
-        const auto prev_turns = static_cast<int>(prev_full_angle / 360.0);
+        const auto prev_turns = static_cast<int>(prev_full_angle.v / 360.0);
         const auto curr_turns = [&]
         {
-            if (curr_angle < 90 && prev_angle > 270)
+            constexpr auto min = Degree{90};
+            constexpr auto max = Degree{270};
+
+            if (curr_angle < min && prev_angle > max)
             {
                 return prev_turns + 1;
             }
 
-            if (prev_angle < 90 && curr_angle > 270)
+            if (prev_angle < min && curr_angle > max)
             {
                 return prev_turns - 1;
             }
@@ -27,31 +30,31 @@ namespace wheel_utils
             return prev_turns;
         }();
 
-        const auto curr_full_angle = curr_turns * 360 + curr_angle;
+        const auto curr_full_angle = Degree{curr_turns * 360 + curr_angle.v};
         return curr_full_angle;
     }
 
-    float angle_to_distance(const Wheel &wheel, float angle)
+    Meter to_distance(const Wheel &wheel, Degree angle)
     {
-        return angle / 360 * wheel.circumference();
+        return Meter{angle.v / 360 * wheel.circumference().v};
     }
 
-    float distance_to_angle(const Wheel &wheel, float distance)
+    Degree to_angle(const Wheel &wheel, Meter distance)
     {
-        return distance / wheel.circumference() * 360;
+        return Degree{distance.v / wheel.circumference().v * 360};
     }
 
     void stop(Wheel &wheel, WheelAttachment &wa)
     {
-        wheel.rotate(wa, 0);
+        wheel.rotate(wa, Speed{0});
     }
 
-    void rotate(Wheel &wheel, WheelAttachment &wa, int speed)
+    void rotate(Wheel &wheel, WheelAttachment &wa, Speed speed)
     {
         wheel.rotate(wa, speed);
     }
 
-    void change_speed(Wheel &wheel, WheelAttachment &wa, int delta_speed)
+    void change_speed(Wheel &wheel, WheelAttachment &wa, Speed delta_speed)
     {
         auto speed = wheel.current_speed() + delta_speed;
         wheel.rotate(wa, speed);

@@ -1,26 +1,26 @@
 #pragma once
 
-#include "robot.h"
+#include "common.h"
 
 namespace robot_utils
 {
-    inline void move_fwd(Robot &robot, float distance)
+    inline void move_fwd(Robot &robot, Meter distance)
     {
-        robot.move(distance, 0);
+        robot.move(distance, Meter{0});
     }
 
-    inline void move_bwd(Robot &robot, float distance)
+    inline void move_bwd(Robot &robot, Meter distance)
     {
-        robot.move(0, distance);
+        robot.move(Meter{0}, distance);
     }
 
-    inline void rotate_left(Robot &robot, float angle)
+    inline void rotate_left(Robot &robot, Degree angle)
     {
-        robot.rotate(angle, 0);
+        robot.rotate(angle, Degree{0});
     }
 
-    inline void rotate_right(Robot &robot, float angle)
+    inline void rotate_right(Robot &robot, Degree angle)
     {
-        robot.rotate(0, angle);
+        robot.rotate(Degree{0}, angle);
     }
 }

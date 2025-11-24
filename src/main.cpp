@@ -80,9 +80,9 @@ Wheels create_wheels()
   auto right_wheel = []
   {
     auto settings = WheelSettings{};
-    settings.control_pin = 5;
-    settings.feedback_pin = 6;
-    settings.speed_dead_range = 5;
+    settings.control_pin = Pin{5};
+    settings.feedback_pin = Pin{6};
+    settings.speed_dead_range = Speed{5};
     settings.label = "right-wheel";
     return Wheel(settings);
   }();
@@ -109,16 +109,16 @@ void do_loop(Robot &robot, const Config &config)
   case Action::UNKNOWN:
     break;
   case Action::GO_FORWARD:
-    robot_utils::move_fwd(robot, param);
+    robot_utils::move_fwd(robot, Meter{param});
     break;
   case Action::GO_BACKWARD:
-    robot_utils::move_bwd(robot, param);
+    robot_utils::move_bwd(robot, Meter{param});
     break;
   case Action::TURN_LEFT:
-    robot_utils::rotate_left(robot, param);
+    robot_utils::rotate_left(robot, Degree{param});
     break;
   case Action::TURN_RIGHT:
-    robot_utils::rotate_right(robot, param);
+    robot_utils::rotate_right(robot, Degree{param});
     break;
   }
 }

@@ -9,18 +9,16 @@ namespace pwm_utils
         return static_cast<float>(duration.high.count()) / duration.full.count();
     }
 
-    CycleDuration measure_pwm_duration(int pin)
+    CycleDuration measure_pwm_duration(Pin pin)
     {
-        auto high = std::chrono::microseconds{pulseIn(pin, HIGH)};
-        auto low = std::chrono::microseconds{pulseIn(pin, LOW)};
+        auto high = Us{pulseIn(pin.v, HIGH)};
+        auto low = Us{pulseIn(pin.v, LOW)};
         auto full = high + low;
 
         return {high, full};
     }
 
-    CycleDuration measure_pwm_duration(int pin,
-                                       std::chrono::microseconds min,
-                                       std::chrono::microseconds max)
+    CycleDuration measure_pwm_duration(Pin pin, Us min, Us max)
     {
         while (true)
         {

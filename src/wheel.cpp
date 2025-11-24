@@ -3,18 +3,19 @@
 #include "pwm_utils.h"
 #include "io_utils.h"
 
+#include <Arduino.h>
 #include <string>
 
 Wheel::Wheel(const WheelSettings &settings)
     : settings_(settings), current_speed_(0)
 {
-    pinMode(settings_.feedback_pin, INPUT);
+    pinMode(settings_.feedback_pin.v, INPUT);
 
     auto wa = attach();
     rotate(wa, current_speed_);
 }
 
-void Wheel::rotate(WheelAttachment &wa, int speed)
+void Wheel::rotate(WheelAttachment &wa, Speed speed)
 {
     if (&wa.servo != &servo_)
     {
@@ -23,10 +24,17 @@ void Wheel::rotate(WheelAttachment &wa, int speed)
     }
 
     // dead range compensation
-    const auto direction = speed < 0 ? -1 : 1;
-    const auto delta_pwm = speed == 0
-                               ? 0
-                               : speed + direction * settings_.speed_dead_range;
+    const auto direction = Speed{speed < Speed{0} ? -1 : 1};
+    const auto delta_pwm = [&]
+    {
+        if (speed == Speed{0})
+        {
+            return Pwm{0};
+        }
+
+        auto adjusted_speed = speed + direction * settings_.speed_dead_range;
+        return Pwm{adjusted_speed.v};
+    }();
 
     const auto pwm = settings_.stop_pwm + delta_pwm;
 
@@ -37,10 +45,10 @@ void Wheel::rotate(WheelAttachment &wa, int speed)
     }
 
     current_speed_ = speed;
-    wa.servo.write(pwm);
+    wa.servo.write(pwm.v);
 }
 
-float Wheel::read_angle() const
+Degree Wheel::read_angle() const
 {
     const auto pwd_duration = pwm_utils::measure_pwm_duration(
         settings_.feedback_pin,
@@ -52,7 +60,8 @@ float Wheel::read_angle() const
     const auto dc_max = settings_.feedback_pwm_duty_cycle_max;
 
     // TODO: revisit correctness of the formula
-    const auto angle = 359 - ((dc - dc_min) * 360.0) / (dc_max - dc_min + 0.01);
+    const auto angle = Degree{
+        359 - ((dc - dc_min) * 360.0f) / (dc_max - dc_min + 0.01f)};
 
     return angle;
 }
