@@ -28,4 +28,9 @@ namespace common_utils
 
         return default_value;
     }
+
+    float ema(float new_value, float prev_value, float alpha)
+    {
+        return alpha * new_value + (1.0f - alpha) * prev_value;
+    }
 }
