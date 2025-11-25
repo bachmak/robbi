@@ -6,26 +6,35 @@
 
 namespace wheel_utils
 {
+    namespace
+    {
+        Degree normalize(Degree d)
+        {
+            const auto v = fmod(d.v, 360.0f);
+            if (v < 0)
+            {
+                return Degree{v + 360.0f};
+            }
+            return Degree{v};
+        }
+    }
+
     Degree get_full_angle(const Wheel &wheel, const Degree prev_full_angle)
     {
-        const auto prev_angle = Degree{fmod(prev_full_angle.v, 360.0f)};
-        const auto curr_angle = wheel.read_angle();
+        const auto prev_angle = normalize(prev_full_angle);
+        const auto curr_angle = normalize(wheel.read_angle());
 
-        const auto prev_turns = static_cast<int>(prev_full_angle.v / 360.0f);
+        const auto prev_turns = static_cast<int>(floor(prev_full_angle.v / 360.0f));
         const auto curr_turns = [&]
         {
             constexpr auto min = Degree{90};
             constexpr auto max = Degree{270};
 
             if (curr_angle < min && prev_angle > max)
-            {
                 return prev_turns + 1;
-            }
 
             if (prev_angle < min && curr_angle > max)
-            {
                 return prev_turns - 1;
-            }
 
             return prev_turns;
         }();
