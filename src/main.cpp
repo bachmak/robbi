@@ -42,26 +42,6 @@ struct ActionInfo
   float default_param_value = 0.0;
 };
 
-WheelSettings left_wheel_settings()
-{
-  auto settings = WheelSettings{};
-  settings.control_pin = Pin{5};
-  settings.feedback_pin = Pin{6};
-  settings.speed_dead_range = Speed{5};
-  settings.label = "left-wheel";
-  return settings;
-}
-
-WheelSettings right_wheel_settings()
-{
-  auto settings = WheelSettings{};
-  settings.control_pin = Pin{7};
-  settings.feedback_pin = Pin{8};
-  settings.speed_dead_range = Speed{5};
-  settings.label = "right-wheel";
-  return settings;
-}
-
 struct Config
 {
   int serial_baud = 9600;
@@ -75,8 +55,16 @@ struct Config
   };
 
   RobotSettings robot_settings = {
-      left_wheel_settings(),
-      right_wheel_settings(),
+      .left_wheel_settings = {
+          .control_pin = Pin{5},
+          .feedback_pin = Pin{6},
+          .label = "right-wheel",
+      },
+      .right_wheel_settings = {
+          .control_pin = Pin{7},
+          .feedback_pin = Pin{8},
+          .label = "left-wheel",
+      },
   };
 };
 
@@ -130,7 +118,7 @@ void setup()
 
 void loop()
 {
-  auto config = Config{};
+  const auto config = Config{};
   auto robot = Robot(config.robot_settings);
 
   io_utils::init(config.serial_baud, config.log_level);
