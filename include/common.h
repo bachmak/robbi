@@ -6,11 +6,11 @@
 template <typename T, typename Tag>
 struct StrongType
 {
-    constexpr explicit StrongType(T v) : v(v) {}
+    template <typename U>
+    constexpr explicit StrongType(U v) : v(static_cast<T>(v)) {}
     T v;
 
     using Self = StrongType<T, Tag>;
-    using ValueType = T;
 
     friend Self operator+(Self a, Self b) { return Self{a.v + b.v}; }
     friend Self operator-(Self a, Self b) { return Self{a.v - b.v}; }
