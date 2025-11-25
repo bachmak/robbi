@@ -47,7 +47,7 @@ private:
 class Wheel
 {
 public:
-    explicit Wheel(WheelSettings &&settings);
+    explicit Wheel(const WheelSettings &settings);
 
     Wheel(const Wheel &) = delete;
     Wheel &operator=(const Wheel &) = delete;

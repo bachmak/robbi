@@ -10,9 +10,8 @@ struct RobotSettings
 
 struct Wheels
 {
-    Wheels(WheelSettings &&left_settings, WheelSettings &&right_settings)
-        : left(std::move(left_settings)),
-          right(std::move(right_settings)) {}
+    Wheels(const WheelSettings &left_settings, const WheelSettings &right_settings)
+        : left(left_settings), right(right_settings) {}
 
     Wheel left;
     Wheel right;

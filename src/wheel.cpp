@@ -18,8 +18,8 @@ WheelAttachment::~WheelAttachment()
     io_utils::debug("detached from pin: %d", pin.v);
 }
 
-Wheel::Wheel(WheelSettings &&settings)
-    : settings_(std::move(settings)), current_speed_(0)
+Wheel::Wheel(const WheelSettings &settings)
+    : settings_(settings), current_speed_(0)
 {
     pinMode(settings_.feedback_pin.v, INPUT);
 }
