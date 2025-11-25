@@ -7,37 +7,35 @@ namespace time_utils
     class StopWatch
     {
     public:
-        Ms time_passed(Ms curr_ts = Ms{millis()}) const
+        Ms time_passed(Ms curr = Ms{millis()}) const
         {
-            return curr_ts - start_ts_;
+            return curr - start;
         }
 
     private:
-        Ms start_ts_ = Ms{millis()};
+        Ms start = Ms{millis()};
     };
 
-    class IterationStopWatch
+    class LoopStopWatch
     {
     public:
-        void tick(Ms curr_ts = Ms{millis()})
+        Ms tick(Ms curr = Ms{millis()})
         {
-            last_it_ = (curr_ts - last_ts_);
-            total_ += last_it_;
-            iterations_++;
-            last_ts_ = curr_ts;
+            auto loop = curr - last;
+            common += loop;
+            iterations++;
+            last = curr;
+            return loop;
         }
 
         Ms average() const
         {
-            return Ms{static_cast<int>(static_cast<double>(total_.count()) / iterations_)};
+            return Ms{static_cast<int>(static_cast<double>(common.count()) / iterations)};
         }
 
-        Ms last_it() const { return last_it_; }
-
     private:
-        Ms last_ts_ = Ms{millis()};
-        Ms total_ = {};
-        Ms last_it_ = {};
-        int iterations_ = 0;
+        Ms last = Ms{millis()};
+        Ms common = Ms{0};
+        int iterations = 0;
     };
 }
