@@ -6,17 +6,22 @@
 #include <Arduino.h>
 #include <string>
 
-WheelAttachment::WheelAttachment(Servo &servo, Pin pin) : servo(servo) { servo.attach(pin.v); }
+WheelAttachment::WheelAttachment(Servo &servo, Pin pin) : servo(servo), pin(pin)
+{
+    servo.attach(pin.v);
+    io_utils::debug("attached to pin: %d", pin.v);
+}
 
-WheelAttachment::~WheelAttachment() { servo.detach(); }
+WheelAttachment::~WheelAttachment()
+{
+    servo.detach();
+    io_utils::debug("detached from pin: %d", pin.v);
+}
 
 Wheel::Wheel(WheelSettings &&settings)
     : settings_(std::move(settings)), current_speed_(0)
 {
     pinMode(settings_.feedback_pin.v, INPUT);
-
-    auto wa = attach();
-    rotate(wa, current_speed_);
 }
 
 void Wheel::rotate(WheelAttachment &wa, Speed speed)
