@@ -6,6 +6,11 @@ struct RobotSettings
 {
     WheelSettings left_wheel_settings;
     WheelSettings right_wheel_settings;
+    Ms max_move_time{1'000'000};
+    float p_controller_gain = 50.0f;
+    float speed_ema_filter_coef = 0.1f;
+    Ms wait_after_move{100};
+    Degree inertial_stop_angle{5};
 };
 
 struct Wheels
@@ -31,4 +36,5 @@ public:
 
 private:
     Wheels wheels_;
+    RobotSettings settings_;
 };
