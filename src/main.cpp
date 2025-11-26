@@ -15,6 +15,8 @@ enum class Action
   GO_BACKWARD,
   TURN_LEFT,
   TURN_RIGHT,
+  BACK_AND_FORTH,
+  SQUARE,
   CUSTOM,
 };
 
@@ -32,6 +34,10 @@ const char *to_string(Action action)
     return "TURN_LEFT";
   case Action::TURN_RIGHT:
     return "TURN_RIGHT";
+  case Action::BACK_AND_FORTH:
+    return "BACK_AND_FORTH";
+  case Action::SQUARE:
+    return "SQUARE";
   case Action::CUSTOM:
     return "CUSTOM";
   }
@@ -49,13 +55,15 @@ struct Config
 {
   int serial_baud = 9600;
   Ms delay_after_io_init{2000};
-  io_utils::LogLevel log_level = io_utils::LogLevel::INFO;
+  io_utils::LogLevel log_level = io_utils::LogLevel::DEBUG;
 
   std::unordered_map<std::string, ActionInfo> actions = {
-      {"f", {Action::GO_FORWARD, 0.1}},
-      {"b", {Action::GO_BACKWARD, 0.1}},
+      {"f", {Action::GO_FORWARD, 2}},
+      {"b", {Action::GO_BACKWARD, 2}},
       {"l", {Action::TURN_LEFT, 90.0}},
       {"r", {Action::TURN_RIGHT, 90.0}},
+      {"bf", {Action::BACK_AND_FORTH}},
+      {"s", {Action::SQUARE}},
       {"c", {Action::CUSTOM}},
   };
 
@@ -88,37 +96,81 @@ ActionInfo str_to_action_info(const std::string &action_name, const Config &conf
 
 void do_loop(Robot &robot, const Config &config)
 {
-  const auto action_str = common_utils::trim(io_utils::get_string());
-  const auto action_info = str_to_action_info(action_str, config);
+  const auto input = common_utils::trim(io_utils::get_string());
+  const auto tokens = common_utils::split(input);
 
-  const auto param_str = io_utils::try_get_string();
-  const auto param = common_utils::str_to_float(param_str, action_info.default_param_value);
+  if (tokens.size() < 1)
+  {
+    io_utils::error("Not enough arguments");
+    return;
+  }
 
-  io_utils::info(
-      "Received: command: %s, parameter: %s. Action: %s",
-      action_str.c_str(),
-      param_str.value_or("").c_str(),
-      to_string(action_info.action));
+  const auto action_name = tokens.front();
+  const auto action_info = str_to_action_info(action_name, config);
+
+  auto get_float_token = [&](size_t idx, float default_value = 0.0f)
+  {
+    if (default_value == 0.0f)
+    {
+      default_value = action_info.default_param_value;
+    }
+
+    if (tokens.size() > idx)
+    {
+      return common_utils::str_to_float(tokens[idx])
+          .value_or(default_value);
+    }
+
+    return default_value;
+  };
+
+  io_utils::info("Received: input: %s, command: %s. Action: %s", input.c_str(), action_name.c_str(), to_string(action_info.action));
 
   switch (action_info.action)
   {
   case Action::UNKNOWN:
     break;
   case Action::GO_FORWARD:
-    robot_utils::move_fwd(robot, Meter{param});
+    robot_utils::move_fwd(robot, Meter{get_float_token(1)});
     break;
   case Action::GO_BACKWARD:
-    robot_utils::move_bwd(robot, Meter{param});
+    robot_utils::move_bwd(robot, Meter{get_float_token(1)});
     break;
   case Action::TURN_LEFT:
-    robot_utils::rotate_left(robot, Degree{param});
+    robot_utils::rotate_left(robot, Degree{get_float_token(1)});
     break;
   case Action::TURN_RIGHT:
-    robot_utils::rotate_right(robot, Degree{param});
+    robot_utils::rotate_right(robot, Degree{get_float_token(1)});
     break;
+  case Action::BACK_AND_FORTH:
+    robot_utils::move_fwd(robot, Meter{get_float_token(1, 1)});
+    robot_utils::move_bwd(robot, Meter{get_float_token(2, 1)});
+    break;
+  case Action::SQUARE:
+  {
+    const auto straight = Meter{get_float_token(1, 0.4)};
+    const auto turn = Degree{get_float_token(2, 90)};
+
+    for (int i = 0; i < 4; i++)
+    {
+      robot_utils::move_fwd(robot, straight);
+      robot_utils::rotate_left(robot, turn);
+    }
+    for (int i = 0; i < 4; i++)
+    {
+      robot_utils::rotate_right(robot, turn);
+      robot_utils::move_bwd(robot, straight);
+    }
+    break;
+  }
   case Action::CUSTOM:
-    robot.rotate(Degree{-200}, Degree{200}, Speed{1});
+  {
+    const auto left_wheel_rotation = Degree{get_float_token(1, 200)};
+    const auto right_wheel_rotation = Degree{get_float_token(2, 200)};
+    const auto speed = Speed{get_float_token(3, 1)};
+    robot.rotate(left_wheel_rotation, right_wheel_rotation, speed);
     break;
+  }
   }
 }
 

@@ -21,6 +21,37 @@ namespace common_utils
         return std::string(start, end);
     }
 
+    std::vector<std::string> split(const std::string &s)
+    {
+        constexpr auto delim = ' ';
+        auto result = std::vector<std::string>{};
+
+        auto start = std::size_t{0};
+        while (start <= s.size())
+        {
+            auto pos = s.find(delim, start);
+            if (pos == std::string::npos)
+            {
+                pos = s.size();
+            }
+            auto len = pos - start;
+
+            if (len > 0)
+            {
+                result.emplace_back(s.substr(start, len));
+            }
+
+            if (pos == s.size())
+            {
+                break;
+            }
+
+            start = pos + 1;
+        }
+
+        return result;
+    }
+
     std::optional<float> str_to_float(const std::string &str)
     {
         char *end = nullptr;
