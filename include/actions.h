@@ -242,9 +242,9 @@ std::string to_string(const Action &action)
                           [](const A::X &)
                           { return "X"; },
                           [](const A::Custom &)
-                          { return "Custom"; },
+                          { return "CUSTOM"; },
                           [](const A::None &)
-                          { return "None"; },
+                          { return "NONE"; },
                       },
                       action);
 }
