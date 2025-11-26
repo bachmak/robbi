@@ -72,6 +72,7 @@ struct Config
           .speed_dead_range = Speed{4},
           .label = "left-wheel",
       },
+      .width = Meter{0.105},
   };
 };
 
