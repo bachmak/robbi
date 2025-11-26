@@ -2,6 +2,12 @@
 
 #include <Arduino.h>
 
+constexpr auto color_reset = "\033[0m";
+constexpr auto color_red = "\033[31m";
+constexpr auto color_green = "\033[32m";
+constexpr auto color_yellow = "\033[33m";
+constexpr auto color_blue = "\033[34m";
+
 namespace io_utils
 {
     namespace
@@ -27,14 +33,33 @@ namespace io_utils
             return "UNKNOWN";
         }
 
+        const char *to_ansi_terminal_color(LogLevel log_level)
+        {
+            switch (log_level)
+            {
+            case LogLevel::OFF:
+                return color_reset;
+            case LogLevel::ERROR:
+                return color_red;
+            case LogLevel::WARNING:
+                return color_yellow;
+            case LogLevel::INFO:
+                return color_green;
+            case LogLevel::DEBUG:
+                return color_blue;
+            }
+
+            return color_reset;
+        }
+
         void log(LogLevel log_level, const char *format, va_list ap)
         {
             if (log_level <= s_log_level)
             {
-                Serial.printf("[%s] ", to_string(log_level));
+                Serial.printf("%s[%s] ", to_ansi_terminal_color(log_level), to_string(log_level));
 
                 Serial.vprintf(format, ap);
-                Serial.print('\n');
+                Serial.printf("%s\n", color_reset);
             }
         }
     }
