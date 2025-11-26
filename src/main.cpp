@@ -72,15 +72,17 @@ struct Config
           .control_pin = Pin{5},
           .feedback_pin = Pin{6},
           .speed_dead_range = Speed{4},
+          .circumference = Meter{0.205},
           .label = "right-wheel",
       },
       .right_wheel_settings = {
           .control_pin = Pin{7},
           .feedback_pin = Pin{8},
           .speed_dead_range = Speed{4},
+          .circumference = Meter{0.205},
           .label = "left-wheel",
       },
-      .width = Meter{0.105},
+      .width = Meter{0.102},
   };
 };
 
