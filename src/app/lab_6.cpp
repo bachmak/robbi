@@ -1,29 +1,13 @@
 #include "app/lab_6.h"
 
+#include "ros_oop/support.h"
+#include "ros_oop/node.h"
+#include "ros_oop/publisher.h"
+#include "ros_oop/executor.h"
+#include "ros_oop/timer.h"
+#include "io_utils.h"
+
 #include <Arduino.h>
-
-#include <rcl/rcl.h>
-#include <rclc/rclc.h>
-#include <rclc/executor.h>
-
-#include <std_msgs/msg/int32.h>
-
-
-#define RCCHECK(fn)                  \
-    {                                \
-        rcl_ret_t temp_rc = fn;      \
-        if ((temp_rc != RCL_RET_OK)) \
-        {                            \
-            error_loop();            \
-        }                            \
-    }
-#define RCSOFTCHECK(fn)              \
-    {                                \
-        rcl_ret_t temp_rc = fn;      \
-        if ((temp_rc != RCL_RET_OK)) \
-        {                            \
-        }                            \
-    }
 
 namespace lab_6
 {
@@ -34,92 +18,47 @@ namespace lab_6
             .serial_redirect = io_utils::SerialRedirect::MICRO_ROS,
             .delay_after_init = Ms{2000},
         };
+
+        const char *node_name = "micro_ros_platformio_node";
+        const char *topic_name = "micro_ros_platformio_node_publisher";
+
+        Ms timer_period{1000};
+        Ms loop_delay{100};
+        Ms spin_timeout{100};
     };
 
-    namespace
+    void do_loop(ros::Executor &executor, const Config &config)
     {
-        rcl_publisher_t publisher;
-        std_msgs__msg__Int32 msg;
-
-        rclc_executor_t executor;
-        rclc_support_t support;
-        rcl_allocator_t allocator;
-        rcl_node_t node;
-        rcl_timer_t timer;
-
-        void timer_callback(rcl_timer_t *timer, int64_t last_call_time)
-        {
-            RCLC_UNUSED(last_call_time);
-            if (timer != NULL)
-            {
-                RCSOFTCHECK(rcl_publish(&publisher, &msg, NULL));
-                msg.data++;
-            }
-        }
-
-        // Error handle loop
-        void error_loop()
-        {
-            while (1)
-            {
-                delay(100);
-            }
-        }
-    }
-
-    void do_setup()
-    {
-        // Configure serial transport
-        Serial.begin(115200);
-        set_microros_serial_transports(Serial);
-        delay(2000);
-
-        allocator = rcl_get_default_allocator();
-
-        // create init_options
-        RCCHECK(rclc_support_init(&support, 0, NULL, &allocator));
-
-        // create node
-        RCCHECK(rclc_node_init_default(&node, "micro_ros_platformio_node", "", &support));
-
-        // create publisher
-        RCCHECK(rclc_publisher_init_default(
-            &publisher,
-            &node,
-            ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32),
-            "micro_ros_platformio_node_publisher"));
-
-        // create timer,
-        const unsigned int timer_timeout = 1000;
-        RCCHECK(rclc_timer_init_default(
-            &timer,
-            &support,
-            RCL_MS_TO_NS(timer_timeout),
-            timer_callback));
-
-        // create executor
-        RCCHECK(rclc_executor_init(&executor, &support.context, 1, &allocator));
-        RCCHECK(rclc_executor_add_timer(&executor, &timer));
-
-        msg.data = 0;
-    }
-
-    void do_loop()
-    {
-        delay(100);
-        RCSOFTCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100)));
+        delay(config.loop_delay.count());
+        executor.spin_some(config.spin_timeout);
     }
 
     void run()
     {
-        auto config = Config{};
+        const auto config = Config{};
 
         io_utils::init(config.io_setings);
 
-        do_setup();
+        auto &support = ros::Support::get_instance();
+        auto node = ros::Node{support, config.node_name};
+        auto publisher = ros::Publisher<int32_t>{node, config.topic_name};
+        auto timer_callback = [&](int64_t last_call_time)
+        {
+            static auto counter = 0;
+            publisher.publish(counter++);
+        };
+
+        auto timer = ros::Timer{support, config.timer_period, timer_callback};
+
+        auto executables = std::vector<ros::Executable>{
+            &timer,
+        };
+
+        auto executor = ros::Executor{support, executables};
+
         while (true)
         {
-            do_loop();
+            do_loop(executor, config);
         }
     }
 }
