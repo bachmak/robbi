@@ -7,20 +7,6 @@ namespace rclc
 {
     namespace
     {
-        void error_loop()
-        {
-            while (1)
-            {
-            }
-        }
-
-        void rcc_verify(rcl_ret_t ret)
-        {
-            if (ret != RCL_RET_OK)
-            {
-                error_loop();
-            }
-        }
     }
 
     Support &Support::getInstance()
