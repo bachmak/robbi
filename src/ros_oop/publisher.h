@@ -3,6 +3,7 @@
 #include "ros_oop/node.h"
 #include "ros_oop/publisher_traits.h"
 #include "utils/non_copyable.h"
+#include "utils/rcl.h"
 
 namespace ros
 {
