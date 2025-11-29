@@ -1,6 +1,11 @@
 #include "io_utils.h"
 
 #include <Arduino.h>
+#include <micro_ros_platformio.h>
+
+#if !defined(MICRO_ROS_TRANSPORT_ARDUINO_SERIAL)
+#error This is only avaliable for Arduino framework with serial transport
+#endif
 
 constexpr auto color_reset = "\033[0m";
 constexpr auto color_red = "\033[31m";
@@ -64,10 +69,21 @@ namespace io_utils
         }
     }
 
-    void init(int serial_baud, LogLevel log_level)
+    void init(const Settings &settings)
     {
-        s_log_level = log_level;
-        Serial.begin(serial_baud);
+        s_log_level = settings.log_level;
+        Serial.begin(settings.serial_baud);
+
+        switch (settings.serial_redirect)
+        {
+        case SerialRedirect::DEFAULT:
+            break;
+        case SerialRedirect::MICRO_ROS:
+            set_microros_serial_transports(Serial);
+            break;
+        }
+
+        delay(settings.delay_after_init.count());
     }
 
     std::string get_string()

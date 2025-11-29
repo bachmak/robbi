@@ -5,8 +5,6 @@
 #include "io_utils.h"
 #include "actions.h"
 
-#include <Arduino.h>
-
 #include <unordered_map>
 #include <string>
 #include <variant>
@@ -15,9 +13,10 @@ namespace lab_5
 {
     struct Config
     {
-        int serial_baud = 9600;
-        Ms delay_after_io_init{2000};
-        io_utils::LogLevel log_level = io_utils::LogLevel::DEBUG;
+        io_utils::Settings io_settings = {
+            .log_level = io_utils::LogLevel::DEBUG,
+            .delay_after_init = Ms{2000},
+        };
 
         std::unordered_map<std::string, Action> actions = {
             {"f", ActionType::GoForward{}},
@@ -92,8 +91,7 @@ namespace lab_5
         const auto config = Config{};
         auto robot = Robot(config.robot_settings);
 
-        io_utils::init(config.serial_baud, config.log_level);
-        delay(config.delay_after_io_init.count());
+        io_utils::init(config.io_settings);
         io_utils::debug("Initialization complete");
 
         while (true)

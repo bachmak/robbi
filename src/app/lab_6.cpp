@@ -1,7 +1,6 @@
 #include "app/lab_6.h"
 
 #include <Arduino.h>
-#include <micro_ros_platformio.h>
 
 #include <rcl/rcl.h>
 #include <rclc/rclc.h>
@@ -9,9 +8,6 @@
 
 #include <std_msgs/msg/int32.h>
 
-#if !defined(MICRO_ROS_TRANSPORT_ARDUINO_SERIAL)
-#error This example is only avaliable for Arduino framework with serial transport.
-#endif
 
 #define RCCHECK(fn)                  \
     {                                \
@@ -31,6 +27,14 @@
 
 namespace lab_6
 {
+    struct Config
+    {
+        io_utils::Settings io_setings{
+            .serial_baud = 115200,
+            .serial_redirect = io_utils::SerialRedirect::MICRO_ROS,
+            .delay_after_init = Ms{2000},
+        };
+    };
 
     namespace
     {
@@ -108,6 +112,10 @@ namespace lab_6
 
     void run()
     {
+        auto config = Config{};
+
+        io_utils::init(config.io_setings);
+
         do_setup();
         while (true)
         {
