@@ -43,6 +43,7 @@ namespace lab_6
         const char *node_name = "wheely";
         const char *cmd_vel_topic = "cmd-vel";
         const char *cmd_vel_echo_topic = "cmd-vel-echo";
+        const char *logs_topic = "logs";
         const char *config_topic = "wheely-config";
 
         Ms ping_interval{500};
@@ -69,6 +70,9 @@ namespace lab_6
             node,
             config.cmd_vel_echo_topic,
         };
+
+        auto log_publisher = ros::Publisher<std::string>{node, config.logs_topic};
+        io_utils::redirect_to(log_publisher);
 
         auto wheely = Wheely{config.wheely_settings};
         auto wheely_configurator = WheelyConfigurator{wheely, node, config.config_topic};
@@ -100,6 +104,8 @@ namespace lab_6
             executor.spin_some(config.spin_timeout);
             wheely.update(dt);
         }
+
+        io_utils::redirect_reset();
     }
 
     void run()

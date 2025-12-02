@@ -5,6 +5,12 @@
 #include <optional>
 #include <string>
 
+namespace ros
+{
+    template <typename T>
+    class Publisher;
+}
+
 namespace io_utils
 {
     enum class LogLevel
@@ -31,6 +37,9 @@ namespace io_utils
     };
 
     void init(const Settings &settings);
+
+    void redirect_to(ros::Publisher<std::string> &publisher);
+    void redirect_reset();
 
     std::string get_string();
     std::optional<std::string> try_get_string();

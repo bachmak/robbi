@@ -1,5 +1,7 @@
 #include "io_utils.h"
 
+#include "ros_oop/publisher.h"
+
 #include <Arduino.h>
 #include <micro_ros_platformio.h>
 
@@ -18,6 +20,8 @@ namespace io_utils
     namespace
     {
         LogLevel s_log_level = LogLevel::INFO;
+
+        ros::Publisher<std::string> *s_log_publisher = nulllptr;
 
         const char *to_string(LogLevel log_level)
         {
@@ -59,7 +63,29 @@ namespace io_utils
 
         void log(LogLevel log_level, const char *format, va_list ap)
         {
-            if (log_level <= s_log_level)
+            if (log_level > s_log_level)
+            {
+                return;
+            }
+
+            if (s_log_publisher)
+            {
+                va_list ap_copy;
+                va_copy(ap_copy, ap);
+
+                int size = std::vsnprintf(nullptr, 0, format, ap_copy);
+                va_end(ap_copy);
+
+                auto output = std::string();
+                if (size >= 0)
+                {
+                    output.resize(size);
+                    std::vsnprintf(output.data(), output.size() + 1, format, ap);
+                }
+
+                s_log_publisher->publish(output);
+            }
+            else
             {
                 Serial.printf("%s[%s] ", to_ansi_terminal_color(log_level), to_string(log_level));
 
@@ -84,6 +110,16 @@ namespace io_utils
         }
 
         delay(settings.delay_after_init.count());
+    }
+
+    void redirect_to(ros::Publisher<std::string> &publisher)
+    {
+        s_log_publisher = &publisher;
+    }
+
+    void redirect_reset()
+    {
+        s_log_publisher = nullptr;
     }
 
     std::string get_string()
