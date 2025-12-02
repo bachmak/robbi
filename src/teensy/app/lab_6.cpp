@@ -8,7 +8,7 @@
 #include "ros_oop/timer.h"
 #include "io_utils.h"
 #include "time_utils.h"
-#include "robot_utils.h"
+#include "wheely.h"
 #include "utils/connection.h"
 
 namespace lab_6
@@ -21,26 +21,27 @@ namespace lab_6
             .delay_after_init = Ms{2000},
         };
 
-        RobotSettings robot_settings = {
-            .left_wheel_settings = {
-                .control_pin = Pin{5},
-                .feedback_pin = Pin{6},
-                .speed_dead_range = Speed{4},
-                .circumference = Meter{0.205},
-                .label = "right-wheel",
+        WheelySettings wheely_settings = {
+            .left = {
+                .motor = {
+                    .control_pin = Pin{5},
+                    .feedback_pin = Pin{6},
+                },
+                .radius = Meter{0.0326},
             },
-            .right_wheel_settings = {
-                .control_pin = Pin{7},
-                .feedback_pin = Pin{8},
-                .speed_dead_range = Speed{4},
-                .circumference = Meter{0.205},
-                .label = "left-wheel",
+            .right = {
+                .motor = {
+                    .control_pin = Pin{7},
+                    .feedback_pin = Pin{8},
+                },
+                .radius = Meter{0.0326},
             },
             .width = Meter{0.102},
         };
 
-        const char *node_name = "wheels";
-        const char *topic_name = "move";
+        const char *node_name = "wheely";
+        const char *cmd_vel_topic = "cmd_vel";
+        const char *cmd_vel_echo_topic = "cmd_vel_echo";
 
         Ms ping_interval{500};
         Ms ping_timeout{100};
@@ -49,9 +50,7 @@ namespace lab_6
         Ms connection_check_period{500};
     };
 
-    static const auto config = Config{};
-
-    void do_loop(Wheels &wheels, const Config &config)
+    void do_loop(const Config &config)
     {
         auto ping_timer = time_utils::Timer{
             config.ping_interval,
@@ -64,41 +63,22 @@ namespace lab_6
 
         auto support = ros::Support{};
         auto node = ros::Node{support, config.node_name};
-
-        auto wa_left = wheels.left.attach();
-        auto wa_right = wheels.right.attach();
-
-        auto motors_move = [&](Speed left, Speed right)
-        {
-            wheels.left.rotate(wa_left, left);
-            wheels.right.rotate(wa_right, right);
-        };
-
-        auto subscription_callback = [&](int32_t data)
-        {
-            switch (data)
-            {
-            case 0:
-                motors_move(Speed{0}, Speed{0});
-                return;
-            case 1:
-                motors_move(Speed{1}, Speed{-1});
-                return;
-            case 2:
-                motors_move(Speed{-1}, Speed{1});
-                return;
-            case 3:
-                motors_move(Speed{-1}, Speed{-1});
-                return;
-            case 4:
-                motors_move(Speed{1}, Speed{1});
-                return;
-            }
-        };
-
-        auto subscription = ros::Subscription<int32_t>{
+        auto cmd_vel_echo_publisher = ros::Publisher<geo_utils::Twist>{
             node,
-            config.topic_name,
+            config.cmd_vel_echo_topic,
+        };
+
+        auto wheely = Wheely{config.wheely_settings};
+
+        auto subscription_callback = [&](const geo_utils::Twist &twist)
+        {
+            cmd_vel_echo_publisher.publish(twist);
+            wheely.set_target_speed(twist);
+        };
+
+        auto subscription = ros::Subscription<geo_utils::Twist>{
+            node,
+            config.cmd_vel_topic,
             subscription_callback};
 
         auto executables = std::vector<ros::Executable>{
@@ -107,25 +87,25 @@ namespace lab_6
 
         auto executor = ros::Executor{support, executables};
 
+        auto last = Us{micros() - 1000}; // to prevent first dt == 0
         while (!utils::connection::is_disconnected(ping_timer, config.ping_timeout))
         {
+            const auto now = Us{micros()};
+            const auto dt = now - std::exchange(last, now);
+
             executor.spin_some(config.spin_timeout);
+            wheely.update(dt);
         }
     }
 
     void run()
     {
         const auto config = Config{};
-        auto wheels = Wheels{
-            config.robot_settings.left_wheel_settings,
-            config.robot_settings.right_wheel_settings,
-        };
-
         io_utils::init(config.io_setings);
 
         while (true)
         {
-            do_loop(wheels, config);
+            do_loop(config);
         }
     }
 }
