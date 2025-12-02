@@ -68,3 +68,4 @@ using Meter = StrongType<float, struct MeterTag>;
 using Pin = StrongType<int, struct PinTag>;
 using Pwm = StrongType<int, struct PwmTag>;
 using Speed = StrongType<int, struct SpeedTag>;
+using DegSec = StrongType<float, struct DegSecTag>;
