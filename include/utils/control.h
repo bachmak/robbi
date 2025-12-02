@@ -3,6 +3,8 @@
 #include "common.h"
 #include "settings.h"
 
+#include <string_view>
+
 namespace utils::control
 {
     struct PIDSettings
@@ -29,6 +31,8 @@ namespace utils::control
     public:
         float update(float setpoint, float measurement, float dt);
         void set(Setting setting, float value);
+
+        void configure(std::string_view setting, float value);
 
     private:
         PIDSettings settings_;

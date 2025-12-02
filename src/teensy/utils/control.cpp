@@ -1,5 +1,7 @@
 #include "utils/control.h"
 
+#include "io_utils.h"
+
 #include <utility>
 #include <algorithm>
 
@@ -51,28 +53,31 @@ namespace utils::control
         return std::clamp(output, settings_.out_min, settings_.out_max);
     }
 
-    void PID::set(Setting setting, float value)
+    void PID::configure(std::string_view setting, float value)
     {
-        switch (setting)
+        if (setting == "g")
         {
-        case Setting::PID_G:
             settings_.G = value;
-            break;
-        case Setting::PID_T_I:
+        }
+        else if (setting == "t-i")
+        {
             settings_.T_i = value;
-            break;
-        case Setting::PID_T_D:
+        }
+        else if (setting == "t-d")
+        {
             settings_.T_d = value;
-            break;
-        case Setting::PID_OUT_MIN:
+        }
+        else if (setting == "out-min")
+        {
             settings_.out_min = value;
-            break;
-        case Setting::PID_OUT_MAX:
+        }
+        else if (setting == "out-max")
+        {
             settings_.out_max = value;
-            break;
-
-        default:
-            break;
+        }
+        else
+        {
+            io_utils::error("PID: unknown setting: %s", setting.data());
         }
 
         params_ = to_params(settings_);
