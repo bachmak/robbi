@@ -6,12 +6,19 @@
 #include "io_utils.h"
 
 #include <Servo.h>
+#include <Arduino.h>
 
 #include <utility>
 #include <algorithm>
 
 namespace
 {
+    void init_pins(const MotorSettings &settings)
+    {
+        pinMode(settings.control_pin.v, OUTPUT);
+        pinMode(settings.feedback_pin.v, INPUT);
+    }
+
     float to_sec(Us t)
     {
         using R = std::ratio_divide<Us::period, Sec::period>;
@@ -84,7 +91,7 @@ Motor::Motor(const MotorSettings &settings)
     : settings_(settings),
       pid_(settings.pid_settings),
       speed_filter_(settings.speed_filter_alpha),
-      last_angle_(read_position(settings))
+      last_angle_((init_pins(settings), read_position(settings)))
 {
     servo_.attach(settings_.control_pin.v);
 }
