@@ -25,6 +25,8 @@ public:
     void update(Us dt);
     void set_target_speed(const geo_utils::Twist &twist);
 
+    void configure(std::string_view setting, float value);
+
 private:
     WheelySettings settings_;
     Motor left_;

@@ -1,5 +1,8 @@
 #include "wheely.h"
 
+#include "common_utils.h"
+#include "io_utils.h"
+
 namespace
 {
     struct MotorSpeeds
@@ -49,4 +52,38 @@ void Wheely::set_target_speed(const geo_utils::Twist &twist)
     const auto speeds = to_motor_speeds(twist, settings_);
     left_.set_target_speed(speeds.left);
     right_.set_target_speed(speeds.right);
+}
+
+void Wheely::configure(std::string_view setting, float value)
+{
+    using common_utils::substr_after;
+
+    auto configure_wheel = [&](WheelSettings &settings, Motor &motor, std::string_view subsetting)
+    {
+        if (auto motor_setting = substr_after(subsetting, "motor."))
+        {
+            return motor.configure(*motor_setting, value);
+        }
+        if (subsetting == "radius")
+        {
+            settings.radius = Meter{static_cast<int>(value)};
+        }
+    };
+
+    if (auto subsetting = common_utils::substr_after(setting, "left."))
+    {
+        configure_wheel(settings_.left, left_, *subsetting);
+    }
+    else if (auto subsetting = common_utils::substr_after(setting, "right."))
+    {
+        configure_wheel(settings_.right, right_, *subsetting);
+    }
+    else if (setting == "width")
+    {
+        settings_.width = Meter{value};
+    }
+    else
+    {
+        io_utils::error("Wheely: unknown setting: %s", setting.data());
+    }
 }
