@@ -2,9 +2,8 @@
 
 #include "common.h"
 
-namespace control
+namespace utils::control
 {
-
     struct PIDSettings
     {
         float G;

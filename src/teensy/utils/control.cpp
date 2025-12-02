@@ -1,9 +1,9 @@
-#include "control/pid.h"
+#include "utils/control.h"
 
 #include <utility>
 #include <algorithm>
 
-namespace control
+namespace utils::control
 {
     namespace
     {
