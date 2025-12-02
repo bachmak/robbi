@@ -1,0 +1,32 @@
+#pragma once
+
+#include "motor.h"
+#include "geo_utils.h"
+
+struct WheelSettings
+{
+    MotorSettings motor;
+    Meter radius;
+};
+
+struct WheelySettings
+{
+    WheelSettings left;
+    WheelSettings right;
+    Meter width;
+};
+
+class Wheely
+{
+public:
+    explicit Wheely(const WheelySettings &settings);
+
+public:
+    void update(Us dt);
+    void set_target_speed(const geo_utils::Twist &twist);
+
+private:
+    WheelySettings settings_;
+    Motor left_;
+    Motor right_;
+};
