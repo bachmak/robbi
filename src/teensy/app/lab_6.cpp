@@ -18,8 +18,9 @@ namespace lab_6
     {
         io_utils::Settings io_setings{
             .serial_baud = 115200,
+            .log_level = io_utils::LogLevel::DEBUG,
             .serial_redirect = io_utils::SerialRedirect::MICRO_ROS,
-            .delay_after_init = Ms{2000},
+            .delay_after_init = Ms{1000},
         };
 
         WheelySettings wheely_settings = {
@@ -45,6 +46,8 @@ namespace lab_6
         const char *cmd_vel_echo_topic = "cmd_vel_echo";
         const char *logs_topic = "logs";
         const char *config_topic = "wheely_config";
+        const char *echo_sub_topic = "echo_request";
+        const char *echo_pub_topic = "echo_response";
 
         Ms ping_interval{500};
         Ms ping_timeout{100};
@@ -71,13 +74,15 @@ namespace lab_6
             config.cmd_vel_echo_topic,
         };
 
-        auto log_publisher = ros::Publisher<std::string>{node, config.logs_topic};
+        auto log_publisher = ros::Publisher<std::string_view>{node, config.logs_topic};
         io_utils::redirect_to(log_publisher);
+
+        auto echo_publisher = ros::Publisher<std::string_view>{node, config.echo_pub_topic};
 
         auto wheely = Wheely{config.wheely_settings};
         auto wheely_configurator = WheelyConfigurator{wheely, node, config.config_topic};
 
-        auto subscription_callback = [&](const geo_utils::Twist &twist)
+        auto twist_callback = [&](const geo_utils::Twist &twist)
         {
             cmd_vel_echo_publisher.publish(twist);
             wheely.set_target_speed(twist);
@@ -86,11 +91,23 @@ namespace lab_6
         auto subscription = ros::Subscription<geo_utils::Twist>{
             node,
             config.cmd_vel_topic,
-            subscription_callback};
+            twist_callback};
+
+        auto echo_callback = [&echo_publisher](std::string_view echo)
+        {
+            echo_publisher.publish(echo);
+        };
+
+        auto echo_subscription = ros::Subscription<std::string_view>{
+            node,
+            config.echo_sub_topic,
+            echo_callback,
+        };
 
         auto executables = std::vector<ros::Executable>{
             &subscription.base(),
             &wheely_configurator.subscription().base(),
+            &echo_subscription.base(),
         };
 
         auto executor = ros::Executor{support, executables};
