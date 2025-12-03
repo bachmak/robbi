@@ -4,8 +4,8 @@
 #include <array>
 
 const int servo_pin = 12;
-const int echo_pin = 8;
-const int trig_pin = 9;
+const int trig_pin = 8;
+const int echo_pin = 9;
 
 Servo servo;
 
@@ -64,6 +64,6 @@ void loop()
         Serial.print(' ');
         Serial.println(distance_cm);
 
-        delay(600);
+        delay(400);
     }
 }
