@@ -16,9 +16,9 @@ struct MotorSettings
 
     utils::control::PIDSettings pid_settings = {
         .G = 1,
-        .T_i = 1,
+        .T_i = 0,
         .T_d = 0,
-        .out_min = std::numeric_limits<float>::min(),
+        .out_min = std::numeric_limits<float>::lowest(),
         .out_max = std::numeric_limits<float>::max(),
         .deadband = 0.001,
     };
