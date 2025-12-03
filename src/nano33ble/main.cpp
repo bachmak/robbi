@@ -6,7 +6,7 @@
 const int servo_pin = 12;
 const int trig_pin = 8;
 const int echo_pin = 9;
-const int measurement_delay_ms = 600;
+const int measurement_delay_ms = 400;
 
 Servo servo;
 
@@ -56,21 +56,22 @@ void loop()
 
     std::array<Angle, 4> positions_deg{
         {
-            {0, 0},
+            {0, 180},
             {80, 90},
-            {170, 180},
+            {170, 0},
             {80, 90},
         }};
 
     for (const auto position_deg : positions_deg)
     {
         rotate_servo(position_deg.adjusted);
+
+        delay(measurement_delay_ms);
+
         auto distance_cm = get_distance_cm();
 
         Serial.print(position_deg.reported);
         Serial.print(' ');
         Serial.println(distance_cm);
-
-        delay(measurement_delay_ms);
     }
 }
