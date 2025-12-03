@@ -60,6 +60,8 @@ namespace lab_6
 
         Ms spin_timeout{100};
         Ms connection_check_period{500};
+
+        Pin main_loop_pin{13};
     };
 
     void do_loop(const Config &config)
@@ -129,11 +131,15 @@ namespace lab_6
 
         auto executor = ros::Executor{support, executables};
 
+        bool led_switch = false;
+
         auto last = Us{micros() - 1000}; // to prevent first dt == 0
         while (!utils::connection::is_disconnected(ping_timer, config.ping_timeout))
         {
             const auto now = Us{micros()};
             const auto dt = now - std::exchange(last, now);
+
+            digitalWrite(config.main_loop_pin.v, std::exchange(led_switch, !led_switch));
 
             if (CrashReport)
             {
@@ -153,6 +159,7 @@ namespace lab_6
     {
         const auto config = Config{};
         io_utils::init(config.io_setings);
+        pinMode(config.main_loop_pin.v, OUTPUT);
 
         while (true)
         {
