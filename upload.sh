@@ -12,6 +12,7 @@ PI_DEST="/home/pi/"
 SSH_KEY_PATH=".ssh-keys/de-pi-228"
 MICRO_ROS_WS="/home/pi/microros_ws"
 MICRO_ROS_DEV="/dev/ttyACM0"
+SERIAL_BAUD="115200"
 
 # Check if the firmware file exists
 if [ ! -f "$FIRMWARE" ]; then
@@ -24,7 +25,7 @@ CMD_LOAD_FIRMWARE="teensy_loader_cli -mmcu=TEENSY40 -w -v -s $FIRMWARE_NAME"
 CMD_RUN_MICRO_ROS_AGENT="
     cd \"$MICRO_ROS_WS\" && 
     source \"install/setup.bash\" &&
-    ros2 run micro_ros_agent micro_ros_agent serial --dev \"$MICRO_ROS_DEV\""
+    ros2 run micro_ros_agent micro_ros_agent serial --dev \"$MICRO_ROS_DEV\" -b \"$SERIAL_BAUD\""
 
 REMOTE_COMMANDS="
     $CMD_KILL_ROS_NODES &&
