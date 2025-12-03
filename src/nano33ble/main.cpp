@@ -3,14 +3,23 @@
 
 #include <array>
 
-Servo myServo;
-const int servo_pin = 7;
+const int servo_pin = 12;
 const int echo_pin = 8;
 const int trig_pin = 9;
 
+Servo servo;
+
 void rotate_servo(int position_deg)
 {
-    myServo.write(position_deg);
+    if (position_deg > 180)
+    {
+        position_deg = 180;
+    }
+    if (position_deg < 0)
+    {
+        position_deg = 0;
+    }
+    servo.write(position_deg);
 }
 
 int get_distance_cm()
@@ -35,8 +44,8 @@ void setup()
     pinMode(trig_pin, OUTPUT);
     pinMode(echo_pin, INPUT);
 
-    myServo.attach(servo_pin);
-    myServo.write(0);
+    servo.attach(servo_pin);
+    servo.write(0);
 
     Serial.begin(9600);
     delay(500);
