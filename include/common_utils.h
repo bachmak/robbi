@@ -46,4 +46,6 @@ namespace common_utils
 
         return v;
     }
+
+    std::string dump_bytes_to_string(std::string_view s);
 }

@@ -121,4 +121,21 @@ namespace common_utils
 
         return std::nullopt;
     }
+
+    std::string dump_bytes_to_string(std::string_view s)
+    {
+        std::string out;
+        out.reserve(s.size() * 3);
+
+        static const char hex[] = "0123456789ABCDEF";
+
+        for (unsigned char c : s)
+        {
+            out.push_back(hex[(c >> 4) & 0xF]);
+            out.push_back(hex[c & 0xF]);
+            out.push_back(' ');
+        }
+
+        return out;
+    }
 }
