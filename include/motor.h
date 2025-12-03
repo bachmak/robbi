@@ -15,7 +15,7 @@ struct MotorSettings
     std::string name = "motor";
 
     utils::control::PIDSettings pid_settings = {
-        .G = 1,
+        .G = 0.2f,
         .T_i = 0,
         .T_d = 0,
         .out_min = std::numeric_limits<float>::lowest(),
