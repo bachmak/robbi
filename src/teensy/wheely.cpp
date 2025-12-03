@@ -50,8 +50,22 @@ void Wheely::update(Us dt)
 void Wheely::set_target_speed(const geo_utils::Twist &twist)
 {
     const auto speeds = to_motor_speeds(twist, settings_);
+
+    io_utils::debug(
+        "Setting new speed: left = %.2f deg/sec, right = %.2f deg/sec",
+        speeds.left.v,
+        speeds.right.v);
+
     left_.set_target_speed(speeds.left);
     right_.set_target_speed(speeds.right);
+}
+
+void Wheely::set_stop(bool value)
+{
+    io_utils::debug("Setting stop: stop = %s", value ? "true" : "false");
+
+    left_.set_stop(value);
+    right_.set_stop(value);
 }
 
 void Wheely::configure(std::string_view setting, float value)

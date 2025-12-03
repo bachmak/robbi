@@ -127,7 +127,20 @@ void Motor::update(Us dt)
     const auto control = pid_.update(target_speed_.v, speed.v, to_sec(dt));
     const auto pwm = Us{control_to_pwm(control, settings_)};
 
+    io_utils::debug("%s: err=%f, ctl=%f, pwm=%d",
+                    settings_.name.c_str(),
+                    target_speed_.v - speed.v,
+                    control,
+                    static_cast<int>(pwm.count()));
+
+    if (stop_)
+    {
+        servo_.writeMicroseconds(settings_.pwm_stop.count());
+    }
+    else
+    {
     servo_.writeMicroseconds(pwm.count());
+    }
 }
 
 void Motor::configure(std::string_view s, float value)

@@ -60,6 +60,8 @@ public:
 
     void configure(std::string_view setting, float value);
 
+    void set_stop(bool value) { stop_ = value; }
+
 private:
     MotorSettings settings_;
     utils::control::PID pid_;
@@ -67,4 +69,5 @@ private:
     DegSec target_speed_{0};
     Degree last_angle_;
     Servo servo_;
+    bool stop_ = false;
 };

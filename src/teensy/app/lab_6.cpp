@@ -46,7 +46,9 @@ namespace lab_6
         };
 
         const char *node_name = "wheely";
+
         const char *cmd_vel_topic = "cmd_vel";
+        const char *cmd_action_topic = "cmd_action";
         const char *cmd_vel_echo_topic = "cmd_vel_echo";
         const char *logs_topic = "logs";
         const char *config_topic = "wheely_config";
@@ -86,32 +88,43 @@ namespace lab_6
         auto wheely = Wheely{config.wheely_settings};
         auto wheely_configurator = WheelyConfigurator{wheely, node, config.config_topic};
 
-        auto twist_callback = [&](const geo_utils::Twist &twist)
+        auto cmd_vel_sub = ros::Subscription<geo_utils::Twist>{
+            node,
+            config.cmd_vel_topic,
+            [&](const geo_utils::Twist &twist)
         {
             cmd_vel_echo_publisher.publish(twist);
             wheely.set_target_speed(twist);
-        };
+            }};
 
-        auto subscription = ros::Subscription<geo_utils::Twist>{
+        auto cmd_action_sub = ros::Subscription<std::string_view>{
             node,
-            config.cmd_vel_topic,
-            twist_callback};
-
-        auto echo_callback = [&echo_publisher](std::string_view echo)
+            config.cmd_action_topic,
+            [&wheely](std::string_view cmd)
+            {
+                if (cmd == "stop")
         {
-            echo_publisher.publish(echo);
-        };
+                    wheely.set_stop(true);
+                }
+                else if (cmd == "go")
+                {
+                    wheely.set_stop(false);
+                }
+            }};
 
-        auto echo_subscription = ros::Subscription<std::string_view>{
+        auto echo_sub = ros::Subscription<std::string_view>{
             node,
             config.echo_sub_topic,
-            echo_callback,
-        };
+            [&echo_publisher](std::string_view echo)
+            {
+                echo_publisher.publish(echo);
+            }};
 
         auto executables = std::vector<ros::Executable>{
-            &subscription.base(),
+            &cmd_vel_sub.base(),
+            &cmd_action_sub.base(),
             &wheely_configurator.subscription().base(),
-            &echo_subscription.base(),
+            &echo_sub.base(),
         };
 
         auto executor = ros::Executor{support, executables};
