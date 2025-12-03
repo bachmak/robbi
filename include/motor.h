@@ -8,9 +8,12 @@
 
 #include <limits>
 #include <string_view>
+#include <string>
 
 struct MotorSettings
 {
+    std::string name = "motor";
+
     utils::control::PIDSettings pid_settings = {
         .G = 1,
         .T_i = 1,
