@@ -2,6 +2,8 @@
 
 #include "common.h"
 
+#include <Print.h>
+
 #include <optional>
 #include <string>
 
@@ -48,4 +50,22 @@ namespace io_utils
     void info(const char *format, ...);
     void warning(const char *format, ...);
     void error(const char *format, ...);
+
+    class StringPrint : public Print
+    {
+    public:
+        std::string buffer;
+
+        size_t write(uint8_t b) override
+        {
+            buffer.push_back(static_cast<char>(b));
+            return 1;
+        }
+
+        size_t write(const uint8_t *data, size_t len) override
+        {
+            buffer.append((const char *)data, len);
+            return len;
+        }
+    };
 }

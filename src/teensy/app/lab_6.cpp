@@ -12,6 +12,8 @@
 #include "wheely_configurator.h"
 #include "utils/connection.h"
 
+#include <CrashReport.h>
+
 namespace lab_6
 {
     struct Config
@@ -119,6 +121,13 @@ namespace lab_6
         {
             const auto now = Us{micros()};
             const auto dt = now - std::exchange(last, now);
+
+            if (CrashReport)
+            {
+                auto p = io_utils::StringPrint{};
+                CrashReport.printTo(p);
+                io_utils::debug("there is a crash report:\n%s", p.buffer.c_str());
+            }
 
             executor.spin_some(config.spin_timeout);
             wheely.update(dt);
