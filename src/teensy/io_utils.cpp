@@ -21,7 +21,7 @@ namespace io_utils
     {
         LogLevel s_log_level = LogLevel::INFO;
 
-        ros::Publisher<std::string> *s_log_publisher = nullptr;
+        ros::Publisher<std::string_view> *s_log_publisher = nullptr;
 
         const char *to_string(LogLevel log_level)
         {
@@ -112,7 +112,7 @@ namespace io_utils
         delay(settings.delay_after_init.count());
     }
 
-    void redirect_to(ros::Publisher<std::string> &publisher)
+    void redirect_to(ros::Publisher<std::string_view> &publisher)
     {
         s_log_publisher = &publisher;
     }

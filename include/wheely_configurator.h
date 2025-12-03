@@ -11,7 +11,7 @@ public:
         : wheely_(wheely),
           subscription_(node,
                         topic_name,
-                        [this](const std::string &str)
+                        [this](std::string_view str)
                         { configure(str); })
     {
     }
@@ -19,7 +19,7 @@ public:
     auto &subscription() { return subscription_; }
 
 private:
-    void configure(const std::string &str)
+    void configure(std::string_view str)
     {
         const auto tokens = common_utils::split(str);
         if (tokens.size() != 2)
@@ -39,5 +39,5 @@ private:
 
 private:
     Wheely &wheely_;
-    ros::Subscription<std::string> subscription_;
+    ros::Subscription<std::string_view> subscription_;
 };

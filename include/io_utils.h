@@ -38,7 +38,7 @@ namespace io_utils
 
     void init(const Settings &settings);
 
-    void redirect_to(ros::Publisher<std::string> &publisher);
+    void redirect_to(ros::Publisher<std::string_view> &publisher);
     void redirect_reset();
 
     std::string get_string();

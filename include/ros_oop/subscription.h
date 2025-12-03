@@ -43,8 +43,11 @@ namespace ros
         using RclMessageType = typename Traits::RclMessageType;
         using Callback = std::function<void(T)>;
 
+        NON_COPYABLE(Subscription)
+
         Subscription(Node &node, const char *topic_name, Callback callback)
-            : base_{
+            : dummy_{(Traits::init(&message_), false)},
+              base_{
                   node,
                   topic_name,
                   static_cast<void *>(&message_),
@@ -58,10 +61,16 @@ namespace ros
         {
         }
 
+        ~Subscription()
+        {
+            Traits::finalize(&message_);
+        }
+
         SubscriptionBase &base() { return base_; }
 
     private:
         RclMessageType message_;
+        bool dummy_;
         SubscriptionBase base_;
         Callback callback_;
     };

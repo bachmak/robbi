@@ -6,9 +6,10 @@
 #include <std_msgs/msg/float32.h>
 #include <std_msgs/msg/string.h>
 #include <geometry_msgs/msg/twist.h>
+#include <micro_ros_utilities/type_utilities.h>
 
 #include <cstdint>
-#include <string>
+#include <string_view>
 
 namespace ros
 {
@@ -38,6 +39,9 @@ namespace ros
         {
             return int32_t{msg->data};
         }
+
+        static auto init(RclMessageType *) {}
+        static auto finalize(RclMessageType *) {}
     };
 
     template <>
@@ -54,6 +58,9 @@ namespace ros
         {
             return RclMessageType{.data = data};
         }
+
+        static auto init(RclMessageType *) {}
+        static auto finalize(RclMessageType *) {}
     };
 
     template <>
@@ -100,10 +107,13 @@ namespace ros
                 },
             };
         }
+
+        static auto init(RclMessageType *) {}
+        static auto finalize(RclMessageType *) {}
     };
 
     template <>
-    struct MessageTraits<std::string>
+    struct MessageTraits<std::string_view>
     {
         using RclMessageType = std_msgs__msg__String;
 
@@ -112,7 +122,7 @@ namespace ros
             return ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, String);
         }
 
-        static auto to_message(const std::string &str)
+        static auto to_message(std::string_view str)
         {
             return RclMessageType{
                 .data = {
@@ -123,9 +133,32 @@ namespace ros
             };
         }
 
+        static auto mem_conf()
+        {
+            return micro_ros_utilities_memory_conf_t{
+                .max_string_capacity = 4096,
+            };
+        }
+
         static auto to_original_type(const RclMessageType *msg)
         {
-            return std::string(msg->data.data, msg->data.size);
+            return std::string_view{msg->data.data, msg->data.size};
+        }
+
+        static auto init(RclMessageType *msg)
+        {
+            micro_ros_utilities_create_message_memory(
+                get_type_support(),
+                msg,
+                mem_conf());
+        }
+
+        static auto finalize(RclMessageType *msg)
+        {
+            micro_ros_utilities_destroy_message_memory(
+                get_type_support(),
+                msg,
+                mem_conf());
         }
     };
 }
