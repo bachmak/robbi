@@ -5,13 +5,19 @@
 
 struct WheelSettings
 {
-    MotorSettings motor;
-    Meter radius;
+    MotorSettings motor = {};
+    Meter radius = Meter{0};
 };
 
 struct WheelySettings
 {
-    WheelSettings left;
+    WheelSettings left = {
+        .motor = {
+            .pwm_deadband_fwd = Us{29},
+            .pwm_deadband_bwd = Us{27},
+        },
+    };
+
     WheelSettings right;
     Meter width;
 };

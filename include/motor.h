@@ -15,7 +15,7 @@ struct MotorSettings
     std::string name = "motor";
 
     utils::control::PIDSettings pid_settings = {
-        .G = 0.2f,
+        .G = 0.3f,
         .T_i = 0,
         .T_d = 0,
         .out_min = std::numeric_limits<float>::lowest(),
@@ -35,11 +35,11 @@ struct MotorSettings
     float feedback_pwm_duty_cycle_max = 0.971f;
 
     Us pwm_min{1400};
-    Us pwm_stop{1500};
+    Us pwm_stop{1508};
     Us pwm_max{1600};
 
-    Us pwm_deadband_fwd{30};
-    Us pwm_deadband_bwd{30};
+    Us pwm_deadband_fwd{22};
+    Us pwm_deadband_bwd{22};
 
     float pwm_gain_fwd = 1.0f;
     float pwm_gain_bwd = 1.0f;
