@@ -43,6 +43,12 @@ struct MotorSettings
 
     float pwm_gain_fwd = 1.0f;
     float pwm_gain_bwd = 1.0f;
+
+    float ff_gain_fwd = 0.155f;
+    float ff_gain_bwd = 0.155f;
+
+    float ramp_rise_rate = 100.0f;
+    float ramp_fall_rate = 100.0f;
 };
 
 class Motor
@@ -65,6 +71,7 @@ public:
 private:
     MotorSettings settings_;
     utils::control::PID pid_;
+    utils::control::Ramp ramp_;
     utils::math::Ema speed_filter_;
     DegSec target_speed_{0};
     Degree last_angle_;

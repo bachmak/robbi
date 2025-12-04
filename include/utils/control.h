@@ -31,7 +31,6 @@ namespace utils::control
 
     public:
         float update(float setpoint, float measurement, float dt);
-        void set(Setting setting, float value);
 
         void configure(std::string_view setting, float value);
 
@@ -41,5 +40,23 @@ namespace utils::control
         float integrator_;
         float prev_error_;
         bool first_run_ = true;
+        bool log_ = true;
+    };
+
+    class Ramp
+    {
+    public:
+        Ramp(float rise_rate, float fall_rate);
+        float update(float target, float dt);
+
+        void reset(float v);
+        float value() const;
+
+        void configure(std::string_view setting, float value);
+
+    private:
+        float rise_rate_; // units per second
+        float fall_rate_; // units per second
+        float value_ = 0.0f;
     };
 }

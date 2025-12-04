@@ -149,6 +149,10 @@ void Motor::configure(std::string_view s, float value)
     {
         return pid_.configure(*pid_setting, value);
     }
+    if (auto ramp_setting = common_utils::substr_after(s, "ramp."))
+    {
+        return ramp_.configure(*ramp_setting, value);
+    }
 
     const auto pwm = Us{static_cast<int>(value)};
 
