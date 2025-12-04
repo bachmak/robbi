@@ -65,35 +65,35 @@ namespace
         return DegSec{angle.v / to_sec(dt)};
     }
 
-    Us control_to_pwm(float control, const MotorSettings &settings)
+    Us ff_to_pwm(DegSec ff, const MotorSettings &settings)
     {
         const auto [zero_point, gain] = [&]() -> std::pair<Us, float>
         {
-            if (control == 0.0f)
+            if (ff == 0.0f)
             {
                 return {settings.pwm_stop, 0.0f};
             }
-            if (control > 0.0f)
+            if (ff > 0.0f)
             {
                 return {
                     settings.pwm_stop + settings.pwm_deadband_fwd,
-                    settings.pwm_gain_fwd,
+                    settings.ff_gain_fwd,
                 };
             }
             return {
                 settings.pwm_stop - settings.pwm_deadband_bwd,
-                settings.pwm_gain_bwd,
+                settings.ff_gain_bwd,
             };
         }();
 
-        const auto pwm = zero_point + Us{static_cast<int64_t>(gain * control)};
-        return std::clamp(pwm, settings.pwm_min, settings.pwm_max);
+        const auto pwm = zero_point + Us{static_cast<int64_t>(ff.v * gain)};
+        return pwm;
     }
 }
 
 Motor::Motor(const MotorSettings &settings)
     : settings_(settings),
-      pid_(settings.pid_settings),
+      ramp_(settings_.ramp_rise_rate, settings_.ramp_fall_rate),
       speed_filter_(settings.speed_filter_alpha),
       last_angle_((init_pins(settings), read_position(settings)))
 {
@@ -124,31 +124,45 @@ void Motor::update(Us dt)
     const auto speed_raw = to_speed(delta_angle, dt);
     const auto speed = Speed{speed_filter_.update(speed_raw.v)};
 
-    const auto control = pid_.update(target_speed_.v, speed.v, to_sec(dt));
-    const auto pwm = Us{control_to_pwm(control, settings_)};
+    const auto sp_speed = DegSec{ramp_.update(target_speed_.v, to_sec(dt))};
 
-    io_utils::debug("%s: err=%f, ctl=%f, pwm=%d",
-                    settings_.name.c_str(),
-                    target_speed_.v - speed.v,
-                    control,
-                    static_cast<int>(pwm.count()));
+    const auto ff_pwm = ff_to_pwm(sp_speed, settings_);
+    const auto pwm_correction = Us{static_cast<int>(settings_.G * (target_speed_.v - speed.v))};
 
-    if (stop_)
+    const auto pwm = ff_pwm + pwm_correction;
+
+    const auto final_pwm = [&]
     {
-        servo_.writeMicroseconds(settings_.pwm_stop.count());
-    }
-    else
+        if (stop_)
+        {
+            return settings_.pwm_stop;
+        }
+        if (pwm_override_.has_value())
+        {
+            return *pwm_override_;
+        }
+        return std::clamp(pwm, settings_.pwm_min, settings_.pwm_max);
+    }();
+
+    if (log_)
     {
-        servo_.writeMicroseconds(pwm.count());
+        io_utils::debug("%s: err=%f, speed=(tg:%.2f,sp:%.2f,r:%.2f,f:%.2f), pwm=(%d+%d=%d)",
+                        settings_.name.c_str(),
+                        static_cast<float>(target_speed_.v - speed.v),
+                        static_cast<float>(target_speed_.v),
+                        static_cast<float>(sp_speed.v),
+                        static_cast<float>(speed_raw.v),
+                        static_cast<float>(speed.v),
+                        static_cast<int>(ff_pwm.count()),
+                        static_cast<int>(pwm_correction.count()),
+                        static_cast<int>(final_pwm.count()));
     }
+
+    servo_.writeMicroseconds(final_pwm.count());
 }
 
 void Motor::configure(std::string_view s, float value)
 {
-    if (auto pid_setting = common_utils::substr_after(s, "pid."))
-    {
-        return pid_.configure(*pid_setting, value);
-    }
     if (auto ramp_setting = common_utils::substr_after(s, "ramp."))
     {
         return ramp_.configure(*ramp_setting, value);
@@ -195,6 +209,37 @@ void Motor::configure(std::string_view s, float value)
     else if (s == "pwm-gain-bwd")
     {
         settings_.pwm_gain_bwd = value;
+    }
+    else if (s == "ff-gain-fwd")
+    {
+        settings_.ff_gain_fwd = value;
+    }
+    else if (s == "ff-gain-bwd")
+    {
+        settings_.ff_gain_bwd = value;
+    }
+    else if (s == "pwm-override")
+    {
+        if (pwm == Us{0})
+        {
+            pwm_override_ = std::nullopt;
+        }
+        else
+        {
+            pwm_override_ = pwm;
+        }
+    }
+    else if (s == "speed")
+    {
+        target_speed_ = DegSec{value};
+    }
+    else if (s == "log")
+    {
+        log_ = (value != 0.0f);
+    }
+    else if (s == "g")
+    {
+        settings_.G = value;
     }
     else
     {

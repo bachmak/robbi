@@ -9,20 +9,13 @@
 #include <limits>
 #include <string_view>
 #include <string>
+#include <optional>
 
 struct MotorSettings
 {
     std::string name = "motor";
 
-    utils::control::PIDSettings pid_settings = {
-        .G = 0.3f,
-        .T_i = 0,
-        .T_d = 0,
-        .out_min = std::numeric_limits<float>::lowest(),
-        .out_max = std::numeric_limits<float>::max(),
-        .deadband = 0.001,
-    };
-
+    float G = 0.3f;
     float speed_filter_alpha = 0.1f;
 
     Pin control_pin{0};
@@ -70,11 +63,12 @@ public:
 
 private:
     MotorSettings settings_;
-    utils::control::PID pid_;
     utils::control::Ramp ramp_;
     utils::math::Ema speed_filter_;
     DegSec target_speed_{0};
     Degree last_angle_;
     Servo servo_;
+    std::optional<Us> pwm_override_;
     bool stop_ = false;
+    bool log_ = true;
 };

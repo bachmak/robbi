@@ -67,6 +67,7 @@ namespace utils::control
         else if (setting == "t-i")
         {
             settings_.T_i = value;
+            integrator_ = 0;
         }
         else if (setting == "t-d")
         {
