@@ -6,7 +6,7 @@
 struct WheelSettings
 {
     MotorSettings motor = {};
-    Meter radius = Meter{0};
+    Meter radius = Meter{0.0326};
 };
 
 struct WheelySettings
@@ -19,7 +19,7 @@ struct WheelySettings
     };
 
     WheelSettings right;
-    Meter width;
+    Meter width = Meter{0.102};
 };
 
 class Wheely

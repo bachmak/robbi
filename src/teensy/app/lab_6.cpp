@@ -32,7 +32,6 @@ namespace lab_6
                     .control_pin = Pin{5},
                     .feedback_pin = Pin{6},
                 },
-                .radius = Meter{0.0326},
             },
             .right = {
                 .motor = {
@@ -40,9 +39,7 @@ namespace lab_6
                     .control_pin = Pin{7},
                     .feedback_pin = Pin{8},
                 },
-                .radius = Meter{0.0326},
             },
-            .width = Meter{0.102},
         };
 
         const char *node_name = "wheely";
