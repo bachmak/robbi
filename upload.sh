@@ -91,8 +91,8 @@ if $DEPLOY_PYTHON; then
     echo "Uploading Python files..."
     declare -A PY_FILES=(
         ["ros_nodes/randi.py"]="/home/pi/lab_6/ros_ws/src/randi/randi/randi.py"
-        ["ros_nodes/robbi.py"]="/home/pi/lab_6/ros_ws/src/randi/randi/robbi.py"
-        ["ros_nodes/sensi.py"]="/home/pi/lab_6/ros_ws/src/randi/randi/sensi.py"
+        ["ros_nodes/robbi.py"]="/home/pi/lab_6/ros_ws/src/robbi/robbi/robbi.py"
+        ["ros_nodes/sensi.py"]="/home/pi/lab_6/ros_ws/src/sensi/sensi/sensi.py"
     )
 
     if $DEPLOY_PYTHON; then
