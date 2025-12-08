@@ -19,30 +19,6 @@ namespace geo_utils
         constexpr auto pi = static_cast<float>(M_PI);
     }
 
-    Degree get_full_angle(const Degree full_angle, const Degree prev_full_angle)
-    {
-        const auto prev_angle = normalize(prev_full_angle);
-        const auto curr_angle = normalize(full_angle);
-
-        const auto prev_turns = static_cast<int>(floor(prev_full_angle.v / 360.0f));
-        const auto curr_turns = [&]
-        {
-            constexpr auto min = Degree{90};
-            constexpr auto max = Degree{270};
-
-            if (curr_angle < min && prev_angle > max)
-                return prev_turns + 1;
-
-            if (prev_angle < min && curr_angle > max)
-                return prev_turns - 1;
-
-            return prev_turns;
-        }();
-
-        const auto curr_full_angle = Degree{curr_turns * 360 + curr_angle.v};
-        return curr_full_angle;
-    }
-
     Meter to_distance(Degree angle, Meter circumference)
     {
         return Meter{angle.v / 360 * circumference.v};
@@ -56,5 +32,26 @@ namespace geo_utils
     Meter to_sector(Degree angle, Meter radius)
     {
         return radius * pi * angle.v / 180.0f;
+    }
+
+    Degree to_delta(Degree curr_angle, Degree prev_angle)
+    {
+        const auto delta_angle = curr_angle - prev_angle;
+        if (delta_angle > 180.0f)
+        {
+            return delta_angle - 360.0f;
+        }
+        if (delta_angle < -180.0f)
+        {
+            return delta_angle + 360.0f;
+        }
+        return delta_angle;
+    }
+
+    Degree to_full(Degree curr_angle, Degree prev_full_angle)
+    {
+        const auto prev_angle = normalize(prev_full_angle);
+        const auto diff = to_delta(curr_angle, prev_angle);
+        return prev_full_angle + diff;
     }
 }
