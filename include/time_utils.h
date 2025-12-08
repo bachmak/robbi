@@ -65,4 +65,13 @@ namespace time_utils
         Ms common = Ms{0};
         int iterations = 0;
     };
+
+    inline float to_sec(Us t)
+    {
+        using R = std::ratio_divide<Us::period, Sec::period>;
+        constexpr auto num = R::num;
+        constexpr auto den = R::den;
+
+        return static_cast<float>(t.count()) * num / den;
+    }
 }
