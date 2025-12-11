@@ -143,13 +143,41 @@ namespace lab_6
             config.cmd_action_topic,
             [&wheely](std::string_view cmd)
             {
-                if (cmd == "stop")
+                const auto tokens = common_utils::split(cmd);
+                if (tokens.size() < 0)
                 {
-                    wheely.set_stop(true);
+                    return;
                 }
-                else if (cmd == "go")
+
+                const auto action = tokens[0];
+                if (action == "stop")
                 {
-                    wheely.set_stop(false);
+                    return wheely.set_stop(true);
+                }
+                if (action == "go")
+                {
+                    return wheely.set_stop(false);
+                }
+                if (tokens.size() < 2)
+                {
+                    return;
+                }
+
+                const auto param_1 = common_utils::str_to_float(tokens[1]);
+                const auto param_2 = common_utils::str_to_float(tokens[2]);
+                if (!param_1.has_value() || !param_2.has_value())
+                {
+                    return;
+                }
+
+                const auto duration = Us{static_cast<int64_t>(*param_2 * 1'000'000)};
+                if (action == "move")
+                {
+                    return wheely.set_target_distance(Meter{*param_1}, duration);
+                }
+                if (action == "rotate")
+                {
+                    return wheely.set_target_rotation(Degree{*param_1}, duration);
                 }
             }};
 
