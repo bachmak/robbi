@@ -2,6 +2,7 @@
 
 #include "common_utils.h"
 #include "io_utils.h"
+#include "time_utils.h"
 
 namespace
 {
@@ -9,6 +10,12 @@ namespace
     {
         DegSec left;
         DegSec right;
+    };
+
+    struct MotorPositions
+    {
+        Degree left;
+        Degree right;
     };
 
     MotorSpeeds to_motor_speeds(
@@ -31,6 +38,31 @@ namespace
             .left = w_l_deg,
             .right = w_r_deg,
         };
+    }
+
+    MotorPositions to_motor_positions(Meter left, Meter right, const WheelySettings &settings)
+    {
+        auto calc_dist = [](Meter distance, Meter radius)
+        {
+            return Degree{distance.v / (2 * M_PI * radius.v) * 360.0f};
+        };
+
+        const auto dist_left = calc_dist(left, settings.left.radius);
+        const auto dist_right = calc_dist(right, settings.right.radius);
+
+        return {
+            .left = dist_left,
+            .right = dist_right,
+        };
+    }
+
+    MotorPositions to_motor_positions(Degree rotation, const WheelySettings &settings)
+    {
+        const auto radius = settings.width / 2;
+        const auto arc_length = radius * M_PI * rotation.v / 180.0f;
+
+        // TODO: figure out the correct signs
+        return to_motor_positions(-arc_length, -arc_length, settings);
     }
 }
 
@@ -60,6 +92,34 @@ void Wheely::set_target_speed(const geo_utils::Twist &twist)
     right_.set_target_speed(speeds.right);
 }
 
+void Wheely::set_target_distance(Meter distance, Us duration)
+{
+    const auto positions = to_motor_positions(distance, -distance, settings_);
+
+    io_utils::info(
+        "Setting new positions: left = %.2f deg, right = %.2f deg, duration = %.2f s",
+        positions.left.v,
+        positions.right.v,
+        time_utils::to_sec(duration));
+
+    left_.set_target_distance(positions.left, duration);
+    right_.set_target_distance(positions.right, duration);
+}
+
+void Wheely::set_target_rotation(Degree rotation, Us duration)
+{
+    const auto positions = to_motor_positions(rotation, settings_);
+
+    io_utils::info(
+        "Setting new positions: left = %.2f deg, right = %.2f deg, duration = %.2f s",
+        positions.left.v,
+        positions.right.v,
+        time_utils::to_sec(duration));
+
+    left_.set_target_distance(positions.left, duration);
+    right_.set_target_distance(positions.right, duration);
+}
+
 void Wheely::set_stop(bool value)
 {
     io_utils::debug("Setting stop: stop = %s", value ? "true" : "false");
@@ -72,7 +132,7 @@ void Wheely::configure(std::string_view setting, float value)
 {
     using common_utils::substr_after;
 
-    auto configure_wheel = [&](WheelSettings &settings, Motor &motor, std::string_view subsetting)
+    auto configure_wheel = [&](WheelSettings &settings, motor::Motor &motor, std::string_view subsetting)
     {
         if (auto motor_setting = substr_after(subsetting, "motor."))
         {
