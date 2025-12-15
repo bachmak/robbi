@@ -14,51 +14,38 @@ class Robbi(Node):
         super().__init__('robbi')
 
         # Parameters
-        self.declare_parameter('range_topic', '/range')
-        self.declare_parameter('cmd_vel_topic', '/cmd_vel')
-        self.declare_parameter('cmd_action_topic', '/cmd_action')
-        self.declare_parameter('desired_distance_m', 0.2)
-        self.declare_parameter('front_obstacle_m', 0.40)
-        self.declare_parameter('forward_speed', 0.1)
-        self.declare_parameter('kp_angular', 2.5)
         self.declare_parameter('control_rate', 20.0)
         self.declare_parameter('turn_angular_speed', 2.0)
 
-        # ---- Load parameters ----
-        range_topic = self.get_parameter('range_topic').value
-        cmd_vel_topic = self.get_parameter('cmd_vel_topic').value
-        cmd_action_topic = self.get_parameter('cmd_action_topic').value
-        self.front_obstacle = self.get_parameter('front_obstacle_m').value
-        self.forward_speed = self.get_parameter('forward_speed').value
-        self.kp = self.get_parameter('kp_angular').value
-        rate = self.get_parameter('control_rate').value
-        self.turn_speed = self.get_parameter('turn_angular_speed').value
-
-        # Sensor storage
-        self.ranges = { "angle_0": None, "angle_90": None, "angle_180": None }
-
-        self.create_subscription(Range, range_topic, self.range_callback, 10)
-        self.twist_pub = self.create_publisher(Twist, cmd_vel_topic, 10)
-        self.action_pub = self.create_publisher(String, cmd_action_topic, 10)
+        # Constants
+        self.front_obstacle = 0.4
+        self.forward_speed = 0.1
+        self.kp = 2.5
+        self.turn_duration = 4
+        self.turn_angle = 180
+        range_topic = '/range'
+        cmd_vel_topic = '/cmd_vel'
+        cmd_action_topic = '/cmd_action'
+        update_interval = 1 / 20.0
 
         # State
         self.wall_side = None
         self.target_distance = None
         self.state = "SEARCH"
-        self.turn_duration = 4
-        self.turn_angle = 180
-
+        self.ranges = { "angle_0": None, "angle_90": None, "angle_180": None }
         self.turn_start_time = 0
 
-        self.min_left = float('inf')
-        self.min_right = float('inf')
+        # ROS2 entities
+        self.create_subscription(Range, range_topic, self.on_range, 10)
+        self.twist_pub = self.create_publisher(Twist, cmd_vel_topic, 10)
+        self.action_pub = self.create_publisher(String, cmd_action_topic, 10)
+        self.create_timer(update_interval, self.update)
 
-        self.create_timer(1.0 / rate, self.update)
         self.get_logger().info("Robbi: SEARCHING for wall first.")
 
 
     # ---------------------------- RANGE CALLBACK ----------------------------
-    def range_callback(self, msg: Range):
+    def on_range(self, msg: Range):
         if self.state == "TURN":
             return
 
