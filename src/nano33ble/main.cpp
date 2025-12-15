@@ -21,7 +21,7 @@ float get_distance(int trig_pin, int echo_pin)
     delayMicroseconds(10);
     digitalWrite(trig_pin, LOW);
 
-    auto duration = pulseIn(echo_pin, HIGH);
+    auto duration = pulseIn(echo_pin, HIGH, 1000);
     auto distance = duration * 3.4f / 2.0f; // us -> m
 
     return distance;
