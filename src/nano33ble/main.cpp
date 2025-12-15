@@ -60,21 +60,21 @@ struct IMUContext
 {
     Madgwick filter;
 
-    const float offset_gx = 1.83;
-    const float offset_gy = -0.75;
-    const float offset_gz = -0.30;
+    const float offset_gx = 1.97;
+    const float offset_gy = -0.28;
+    const float offset_gz = 3.35;
 
-    const float offset_ax = 0.005;
-    const float offset_ay = -0.018;
-    const float offset_az = 0.018;
+    const float offset_ax = -0.062;
+    const float offset_ay = -0.024;
+    const float offset_az = -0.001;
 
-    const float mag_off_x = 5.97;
-    const float mag_off_y = 41.04;
-    const float mag_off_z = -5.65;
+    const float mag_off_x = 43.87;
+    const float mag_off_y = 5.60;
+    const float mag_off_z = -6.72;
 
-    const float mag_slope_x = 1.19;
-    const float mag_slope_y = 0.87;
-    const float mag_slope_z = 0.99;
+    const float mag_slope_x = 0.96;
+    const float mag_slope_y = 0.84;
+    const float mag_slope_z = 1.31;
 
     const int filter_frequency = 15;
 
