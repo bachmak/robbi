@@ -67,9 +67,6 @@ class Robbi(Node):
 
 
     def update(self):
-        if any(v is None for v in self.ranges.values()):
-            return
-
         if self.state == "SEARCH":
             return self.update_search()
         if self.state == "FOLLOW":
