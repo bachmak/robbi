@@ -6,7 +6,7 @@
 const int servo_pin = 12;
 const int trig_pin = 8;
 const int echo_pin = 9;
-const int measurement_delay_ms = 400;
+const int measurement_delay_ms = 600;
 
 Servo servo;
 
