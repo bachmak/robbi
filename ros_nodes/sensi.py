@@ -27,7 +27,7 @@ class Sensi(Node):
         except serial.SerialException as e:
             self.get_logger().error(f"Failed to open serial port: {e}")
 
-        self.timer = self.create_timer(0.05, self.read_serial)
+        self.timer = self.create_timer(0.005, self.read_serial)
 
     def read_serial(self):
         if self.ser.in_waiting:
@@ -76,6 +76,14 @@ class Sensi(Node):
 
         self.us_pub.publish(msg)
 
+    def destroy(self):
+        self.get_logger().info("Shutting down node.")
+
+        if self.ser is not None:
+            self.ser.close()
+
+        super().destroy_node()
+
 
 def main(args=None):
     rclpy.init(args=args)
@@ -86,10 +94,7 @@ def main(args=None):
     except KeyboardInterrupt:
         pass
     finally:
-        node.get_logger().info("Shutting down node.")
-        node.ser.close()
-        node.destroy_node()
-        rclpy.shutdown()
+        node.destroy()
 
 if __name__ == '__main__':
     main()
