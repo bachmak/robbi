@@ -13,11 +13,10 @@ class Robbi(Node):
     def __init__(self):
         super().__init__('robbi')
 
-        # ---- Parameters ----
+        # Parameters
         self.declare_parameter('range_topic', '/range')
         self.declare_parameter('cmd_vel_topic', '/cmd_vel')
         self.declare_parameter('cmd_action_topic', '/cmd_action')
-        self.declare_parameter('wall_side', 'left')
         self.declare_parameter('desired_distance_m', 0.2)
         self.declare_parameter('front_obstacle_m', 0.40)
         self.declare_parameter('forward_speed', 0.1)
@@ -29,8 +28,6 @@ class Robbi(Node):
         range_topic = self.get_parameter('range_topic').value
         cmd_vel_topic = self.get_parameter('cmd_vel_topic').value
         cmd_action_topic = self.get_parameter('cmd_action_topic').value
-        self.wall_side = self.get_parameter('wall_side').value
-        self.desired_distance = self.get_parameter('desired_distance_m').value
         self.front_obstacle = self.get_parameter('front_obstacle_m').value
         self.forward_speed = self.get_parameter('forward_speed').value
         self.kp = self.get_parameter('kp_angular').value
@@ -44,6 +41,9 @@ class Robbi(Node):
         self.twist_pub = self.create_publisher(Twist, cmd_vel_topic, 10)
         self.action_pub = self.create_publisher(String, cmd_action_topic, 10)
 
+        # State
+        self.wall_side = None
+        self.target_distance = None
         self.state = "SEARCH"
         self.turn_duration = 4
         self.turn_angle = 180
@@ -77,21 +77,12 @@ class Robbi(Node):
         front = self.ranges["angle_90"]
         right = self.ranges["angle_180"]
 
-        # ===============================================================
-        # STATE: SEARCH
-        # ===============================================================
         if self.state == "SEARCH":
-            # Keep track of closest left/right readings
-            if left < self.min_left:
-                self.min_left = left
-
-            if right < self.min_right:
-                self.min_right = right
-
-            # Choose side
-            if self.min_left < self.min_right:
+            self.target_distance = min(left, right)
+            
+            if left < right:
                 self.wall_side = "left"
-            else:
+            else
                 self.wall_side = "right"
 
             self.state = "FOLLOW"
@@ -140,8 +131,6 @@ class Robbi(Node):
 
         error = side - self.desired_distance
         angular = max(-1.5, min(1.5, direction * (self.kp * error)))
-        if angular < 0.0:
-            angular *= 1.5
 
         self.get_logger().info(f"error={error}, angular={angular}, wall_side={self.wall_side} side={side}")
 
