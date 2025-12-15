@@ -121,7 +121,7 @@ void loop()
     init(ctx.ultrasonic);
     init(ctx.imu);
 
-    Serial.begin(9600);
+    Serial.begin(115200);
     delay(500);
 
     while (1)
