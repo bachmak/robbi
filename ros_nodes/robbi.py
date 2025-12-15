@@ -28,6 +28,7 @@ class Robbi(Node):
         self.kp = 2.5
         self.turn_duration = 4
         self.turn_angle = 180
+        self.max_dy = 0.05
         range_topic = '/sensi/us'
         cmd_vel_topic = '/cmd_vel'
         cmd_action_topic = '/cmd_action'
@@ -209,7 +210,7 @@ class Robbi(Node):
 
         dt = last.t - prev.t
         dx = self.forward_speed * dt
-        dy = last.value - prev.value
+        dy = min(last.value - prev.value, self.max_dy)
 
         angle_rad = math.atan2(dy, dx)
         angle_deg = math.degrees(angle_rad)
