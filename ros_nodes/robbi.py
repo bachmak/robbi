@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import rclpy
 import math
 import time
@@ -31,9 +29,9 @@ class Robbi(Node):
         # State
         self.wall_side = None
         self.target_distance = None
-        self.state = "SEARCH"
-        self.ranges = { "angle_0": None, "angle_90": None, "angle_180": None }
-        self.turn_start_time = 0
+        self.state = None
+        self.ranges = None
+        self.curr_state_time = None
 
         # ROS2 entities
         self.create_subscription(Range, range_topic, self.on_range, 10)
@@ -43,8 +41,9 @@ class Robbi(Node):
 
         self.get_logger().info("Robbi: SEARCHING for wall first.")
 
+        self.switch_state("SEARCH")
 
-    # ---------------------------- RANGE CALLBACK ----------------------------
+
     def on_range(self, msg: Range):
         if self.state == "TURN":
             return
@@ -54,61 +53,58 @@ class Robbi(Node):
             self.ranges[fid] = msg.range / 100.0  # cm → m
         else:
             self.get_logger().warn(f"Unexpected frame_id: {fid}")
+    
+    def switch_state(self, state):
+        self.state = state
+        self.curr_state_time = time.perf_counter()
 
-    # ---------------------------- MAIN LOOP --------------------------------
+        if state == "SEARCH":
+            return self.enter_search()
+        if state == "FOLLOW":
+            return self.enter_follow()
+        if state == "TURN":
+            return self.enter_turn()
+
+
     def update(self):
         if any(v is None for v in self.ranges.values()):
             return
 
-        left = self.ranges["angle_0"]
-        front = self.ranges["angle_90"]
-        right = self.ranges["angle_180"]
-
         if self.state == "SEARCH":
-            self.target_distance = min(left, right)
-            
-            if left < right:
-                self.wall_side = "left"
-            else
-                self.wall_side = "right"
-
-            self.state = "FOLLOW"
-            return
-
-        if self.state == "TURN":
-            if time.time() - self.turn_start_time < self.turn_duration:
-                return
-
-            if self.wall_side == "left":
-                self.wall_side = "right"
-            else:
-                self.wall_side = "left"
-
-            self.ranges["angle_0"], self.ranges["angle_180"] = \
-                self.ranges["angle_180"], self.ranges["angle_0"]
-
-            self.ranges["angle_90"] = None
-            self.state = "FOLLOW"
-            return
-
-
+            return self.update_search()
         if self.state == "FOLLOW":
-            if 0 < front < self.front_obstacle:
-                self.twist_pub.publish(Twist())
-                time.sleep(1)
+            return self.update_follow()
+        if self.state == "TURN":
+            return self.update_turn()
+    
 
-                action = String()
-                action.data = f"rotate {self.turn_angle} {self.turn_duration}"
-                self.action_pub.publish(action)
+    def enter_search(self):
+        self.wall_side = None
+        self.target_distance = None
+        self.ranges = { "angle_0": None, "angle_90": None, "angle_180": None }
 
-                self.turn_start_time = time.time()
-                self.state = "TURN"
-                return
+    
+    def update_search(self):
+        if self.is_waiting_for_data():
+            return
 
-                time.sleep(self.turn_duration + 0.5)
-                return
+        self.init_wall_side()
 
-        # Select wall side
+        self.switch_state("FOLLOW")
+
+
+    def enter_follow(self):
+        return
+    
+
+    def update_follow(self):
+        if self.is_waiting_for_data():
+            return
+        
+        left, front, right = self.get_angles()
+        if 0 < front < self.front_obstacle:
+            return self.switch_state("TURN")
+
         if self.wall_side == "left":
             side = left
             direction = +1.0
@@ -125,6 +121,57 @@ class Robbi(Node):
         twist.linear.x = self.forward_speed
         twist.angular.z = angular
         self.twist_pub.publish(twist)
+    
+
+    def enter_turn(self):
+        self.twist_pub.publish(Twist())
+        time.sleep(0.5)
+
+        action = String()
+        action.data = f"rotate {self.turn_angle} {self.turn_duration}"
+        self.action_pub.publish(action)
+
+
+    def update_turn(self):
+        elapsed = time.perf_counter() - self.curr_state_time
+        if elapsed < self.turn_duration:
+            return
+        
+        self.invert_orientation()
+        self.switch_state("FOLLOW")
+    
+
+    def is_waiting_for_data(self):
+        return any(v is None for v in self.ranges.values()):
+
+    
+    def init_wall_side(self):
+        left, _, right = self.get_angles()
+        self.target_distance = min(left, right)
+        if left < right:
+            self.wall_side = "left"
+        else:
+            self.wall_side = "right"
+
+    
+    def invert_orientation(self):
+        if left < right:
+            self.wall_side = "left"
+        else
+            self.wall_side = "right"
+
+        self.ranges["angle_0"], self.ranges["angle_180"] = \
+            self.ranges["angle_180"], self.ranges["angle_0"]
+
+        self.ranges["angle_90"] = None
+
+    
+    def get_angles(self):
+        left = self.ranges["angle_0"]
+        front = self.ranges["angle_90"]
+        right = self.ranges["angle_180"]
+        return left, front, right
+    
 
     def destroy(self):
         super().destroy_node()
