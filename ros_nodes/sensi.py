@@ -9,7 +9,7 @@ class Sensi(Node):
     def __init__(self):
         super().__init__('sensi')
 
-        self.declare_parameter('serial_port', '/dev/ttyACM0')
+        self.declare_parameter('serial_port', '/dev/ttyACM1')
         self.declare_parameter('baud_rate', 9600)
         self.declare_parameter('topic_name', 'range')
 
@@ -35,6 +35,8 @@ class Sensi(Node):
                     angle_str, distance_str = line.split()
                     angle = int(angle_str)
                     distance = float(distance_str)
+
+                    self.get_logger().info(f"{angle}: {distance} cm")
 
                     msg = Range()
                     msg.header.stamp = self.get_clock().now().to_msg()
