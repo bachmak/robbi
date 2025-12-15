@@ -23,8 +23,8 @@ float get_distance(int trig_pin, int echo_pin)
     delayMicroseconds(10);
     digitalWrite(trig_pin, LOW);
 
-    auto duration = pulseIn(echo_pin, HIGH, 1000);
-    auto distance = duration * 3.4f / 2.0f; // us -> m
+    auto duration = pulseIn(echo_pin, HIGH);
+    auto distance = duration * 0.00034f / 2.0f; // us -> m
 
     return distance;
 }
@@ -108,16 +108,20 @@ void update(USContext &ctx)
 
     const auto distance = get_distance(ctx.trig_pin, ctx.echo_pin);
 
-    const auto pos = ctx.measurement_positions[ctx.last_position_idx];
-    rotate_async(ctx.servo, pos.adjusted);
+    const auto prev_idx = ctx.last_position_idx;
+    const auto next_idx = (prev_idx + 1) % static_cast<int>(ctx.measurement_positions.size());
+
+    const auto prev_pos = ctx.measurement_positions[prev_idx];
+    const auto next_pos = ctx.measurement_positions[next_idx];
+
+    rotate_async(ctx.servo, next_pos.adjusted);
 
     ctx.last_update_time_ms = current_time_ms;
-    ctx.last_position_idx += 1;
-    ctx.last_position_idx %= static_cast<int>(ctx.measurement_positions.size());
+    ctx.last_position_idx = next_idx;
 
     char buf[32];
 
-    snprintf(buf, sizeof(buf), "us %d %.3f\n", pos.reported, distance);
+    snprintf(buf, sizeof(buf), "us %d %.3f\n", prev_pos.reported, distance);
     Serial.write(buf);
 }
 
@@ -176,7 +180,6 @@ void update(IMUContext &ctx)
     pitch = ctx.filter.getPitch();
     roll = ctx.filter.getRoll();
 
-    // Loop delay to control data rate
     char buf[32];
 
     snprintf(buf, sizeof(buf), "imu %.2f %.2f %.2f\n", yaw, pitch, roll);
