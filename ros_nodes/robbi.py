@@ -2,10 +2,17 @@ import rclpy
 import math
 import time
 
+from dataclasses import dataclass, field
 from geometry_msgs.msg import Twist
 from rclpy.node import Node
 from sensor_msgs.msg import Range
 from std_msgs.msg import String
+
+@dataclass
+class Measurement:
+    value: float
+    t: float = field(default_factory=time.perf_counter)
+
 
 class Robbi(Node):
     def __init__(self):
@@ -50,7 +57,7 @@ class Robbi(Node):
 
         fid = msg.header.frame_id
         if fid in self.ranges:
-            self.ranges[fid] = msg.range
+            self.ranges[fid].append(Measurement(msg.range))
         else:
             self.get_logger().warn(f"Unexpected frame_id: {fid}")
     
@@ -78,7 +85,7 @@ class Robbi(Node):
     def enter_search(self):
         self.wall_side = None
         self.target_distance = None
-        self.ranges = { "angle_0": None, "angle_90": None, "angle_180": None }
+        self.ranges = { "angle_0": [], "angle_90": [], "angle_180": [] }
 
     
     def update_search(self):
@@ -132,7 +139,7 @@ class Robbi(Node):
     
 
     def is_waiting_for_data(self):
-        return any(v is None for v in self.ranges.values()):
+        return any(len(v) == 0 for v in self.ranges.values()):
 
     
     def init_wall_side(self):
@@ -150,16 +157,18 @@ class Robbi(Node):
         else
             self.wall_side = "right"
 
-        self.ranges["angle_0"], self.ranges["angle_180"] = \
-            self.ranges["angle_180"], self.ranges["angle_0"]
+        left = self.ranges["angle_0"][-1]
+        right = self.ranges["angle_180"][-1]
 
-        self.ranges["angle_90"] = None
+        self.ranges["angle_0"] = [Measurement(right.value, 0.0)]
+        self.ranges["angle_180"] = [Measurement(left.value, 0.0)]
+        self.ranges["angle_90"] = []
 
     
     def get_angles(self):
-        left = self.ranges["angle_0"]
-        front = self.ranges["angle_90"]
-        right = self.ranges["angle_180"]
+        left = self.ranges["angle_0"][-1].value
+        front = self.ranges["angle_90"][-1].value
+        right = self.ranges["angle_180"][-1].value
         return left, front, right
     
 
