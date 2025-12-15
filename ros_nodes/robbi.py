@@ -124,9 +124,10 @@ class Robbi(Node):
     
 
     def enter_turn(self):
+        turn_angle = self.turn_angle - self.get_yaw()
         self.cmd_vel(0.0, 0.0)
         time.sleep(0.5)
-        self.cmd_rotate(self.turn_angle, self.turn_duration)
+        self.cmd_rotate(turn_angle, self.turn_duration)
 
 
     def update_turn(self):
@@ -185,6 +186,35 @@ class Robbi(Node):
         action = String()
         action.data = f"rotate {degrees} {duration}"
         self.action_pub.publish(action)
+
+
+    def get_yaw(self):
+        if self.wall_side == "left":
+            return self.get_yaw_from(self.ranges["angle_0"])
+        return self.get_yaw_from(self.ranges["angle_180"])
+
+    
+    def get_yaw_from(self, measurements):
+        if not measurements:
+            return 0.0
+
+        if len(measurements) < 2:
+            return 0.0
+
+        last = measurements[-1]
+        prev = measurements[-2]
+
+        if last.t == 0.0 or prev.t == 0.0:
+            return 0.0
+
+        dt = last.t - prev.t
+        dx = self.forward_speed * dt
+        dy = last.value - prev.value
+
+        angle_rad = math.atan2(dy, dx)
+        angle_deg = math.degrees(angle_rad)
+
+        return angle_deg
 
 
     def destroy(self):
