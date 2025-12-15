@@ -113,23 +113,16 @@ class Robbi(Node):
             direction = -1.0
 
         error = side - self.desired_distance
-        angular = max(-1.5, min(1.5, direction * (self.kp * error)))
+        angular = direction * (self.kp * error)
 
         self.get_logger().info(f"error={error}, angular={angular}, wall_side={self.wall_side} side={side}")
-
-        twist = Twist()
-        twist.linear.x = self.forward_speed
-        twist.angular.z = angular
-        self.twist_pub.publish(twist)
+        self.cmd_vel(self.forward_speed, angular)
     
 
     def enter_turn(self):
-        self.twist_pub.publish(Twist())
+        self.cmd_vel(0.0, 0.0)
         time.sleep(0.5)
-
-        action = String()
-        action.data = f"rotate {self.turn_angle} {self.turn_duration}"
-        self.action_pub.publish(action)
+        self.cmd_rotate(self.turn_angle, self.turn_duration)
 
 
     def update_turn(self):
@@ -173,7 +166,24 @@ class Robbi(Node):
         return left, front, right
     
 
+    def cmd_vel(self, x, z):
+        z = max(-1.5, min(1.5, z))
+
+        twist = Twist()
+        twist.linear.x = x
+        twist.angular.z = z
+        self.twist_pub.publish(twist)
+
+
+    def cmd_rotate(self, degrees, duration):
+        action = String()
+        action.data = f"rotate {degrees} {duration}"
+        self.action_pub.publish(action)
+
+
     def destroy(self):
+        self.cmd_vel(0.0, 0.0)
+
         super().destroy_node()
 
 
@@ -185,9 +195,7 @@ def main(args=None):
     except KeyboardInterrupt:
         pass
     finally:
-        node.twist_pub.publish(Twist())
-        node.destroy_node()
-        rclpy.shutdown()
+        node.destroy()
 
 
 if __name__ == "__main__":
