@@ -3,21 +3,14 @@
 
 #include <array>
 
-const int servo_pin = 12;
-const int trig_pin = 8;
-const int echo_pin = 9;
-const int measurement_delay_ms = 600;
-
-Servo servo;
-
-void rotate_servo(int position_deg)
+void rotate_async(Servo &servo, int position_deg)
 {
     position_deg = std::min(position_deg, 180);
     position_deg = std::max(position_deg, 0);
     servo.write(position_deg);
 }
 
-int get_distance_cm()
+float get_distance(int trig_pin, int echo_pin)
 {
     // turn off
     digitalWrite(trig_pin, LOW);
@@ -29,49 +22,110 @@ int get_distance_cm()
     digitalWrite(trig_pin, LOW);
 
     auto duration = pulseIn(echo_pin, HIGH);
-    auto distance_cm = static_cast<int>(duration * 0.034 / 2.0);
+    auto distance = duration * 3.4f / 2.0f; // us -> m
 
-    return distance_cm;
+    return distance;
 }
 
-void setup()
+struct USContext
 {
-    pinMode(trig_pin, OUTPUT);
-    pinMode(echo_pin, INPUT);
-
-    servo.attach(servo_pin);
-    servo.write(0);
-
-    Serial.begin(9600);
-    delay(500);
-}
-
-void loop()
-{
-    struct Angle
+    struct MeasurementPosition
     {
         int adjusted;
         int reported;
     };
 
-    std::array<Angle, 4> positions_deg{
+    Servo servo;
+    uint32_t last_update_time_ms = 0;
+    int last_position_idx = 0;
+
+    const int servo_pin = 12;
+    const int trig_pin = 8;
+    const int echo_pin = 9;
+    const uint32_t us_update_interval_ms = 600;
+
+    const std::array<MeasurementPosition, 4> measurement_positions = {
         {
             {0, 180},
             {80, 90},
             {170, 0},
             {80, 90},
         }};
+};
 
-    for (const auto position_deg : positions_deg)
+struct IMUContext
+{
+};
+
+struct Context
+{
+    USContext ultrasonic;
+    IMUContext imu;
+};
+
+void init(USContext &ctx)
+{
+    pinMode(ctx.trig_pin, OUTPUT);
+    pinMode(ctx.trig_pin, OUTPUT);
+    pinMode(ctx.echo_pin, INPUT);
+
+    ctx.servo.attach(ctx.servo_pin);
+    ctx.servo.write(0);
+}
+
+void update(USContext &ctx)
+{
+    const auto current_time_ms = millis();
+    if (current_time_ms - ctx.last_update_time_ms < ctx.us_update_interval_ms)
     {
-        rotate_servo(position_deg.adjusted);
+        return;
+    }
 
-        delay(measurement_delay_ms);
+    const auto distance = get_distance(ctx.trig_pin, ctx.echo_pin);
 
-        auto distance_cm = get_distance_cm();
+    const auto pos = ctx.measurement_positions[ctx.last_position_idx];
+    rotate_async(ctx.servo, pos.adjusted);
 
-        Serial.print(position_deg.reported);
-        Serial.print(' ');
-        Serial.println(distance_cm);
+    ctx.last_update_time_ms = current_time_ms - ctx.us_update_interval_ms;
+    ctx.last_position_idx += 1;
+    ctx.last_position_idx %= static_cast<int>(ctx.measurement_positions.size());
+
+    char buf[32];
+
+    snprintf(buf, sizeof(buf), "us %d %.3f\n", pos.reported, distance);
+    Serial.write(buf);
+}
+
+void init(IMUContext &) {}
+
+void update(IMUContext &) {}
+
+void init(Context &ctx)
+{
+    init(ctx.ultrasonic);
+    init(ctx.imu);
+}
+
+void update(Context &ctx)
+{
+    update(ctx.ultrasonic);
+    update(ctx.imu);
+}
+
+void setup() {}
+
+void loop()
+{
+    auto ctx = Context{};
+
+    init(ctx.ultrasonic);
+    init(ctx.imu);
+
+    Serial.begin(9600);
+    delay(500);
+
+    while (1)
+    {
+        update(ctx);
     }
 }
