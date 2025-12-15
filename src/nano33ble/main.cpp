@@ -42,7 +42,7 @@ struct USContext
     const int servo_pin = 12;
     const int trig_pin = 8;
     const int echo_pin = 9;
-    const uint32_t us_update_interval_ms = 600;
+    const uint32_t update_interval_ms = 600;
 
     const std::array<MeasurementPosition, 4> measurement_positions = {
         {
@@ -76,7 +76,7 @@ void init(USContext &ctx)
 void update(USContext &ctx)
 {
     const auto current_time_ms = millis();
-    if (current_time_ms - ctx.last_update_time_ms < ctx.us_update_interval_ms)
+    if (current_time_ms < ctx.last_update_time_ms + ctx.update_interval_ms)
     {
         return;
     }
@@ -86,7 +86,7 @@ void update(USContext &ctx)
     const auto pos = ctx.measurement_positions[ctx.last_position_idx];
     rotate_async(ctx.servo, pos.adjusted);
 
-    ctx.last_update_time_ms = current_time_ms - ctx.us_update_interval_ms;
+    ctx.last_update_time_ms = current_time_ms;
     ctx.last_position_idx += 1;
     ctx.last_position_idx %= static_cast<int>(ctx.measurement_positions.size());
 
