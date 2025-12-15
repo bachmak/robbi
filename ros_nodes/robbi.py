@@ -21,7 +21,7 @@ class Robbi(Node):
         self.kp = 2.5
         self.turn_duration = 4
         self.turn_angle = 180
-        range_topic = '/range'
+        range_topic = '/sensi/us'
         cmd_vel_topic = '/cmd_vel'
         cmd_action_topic = '/cmd_action'
         update_interval = 1 / 20.0
@@ -50,7 +50,7 @@ class Robbi(Node):
 
         fid = msg.header.frame_id
         if fid in self.ranges:
-            self.ranges[fid] = msg.range / 100.0  # cm → m
+            self.ranges[fid] = msg.range
         else:
             self.get_logger().warn(f"Unexpected frame_id: {fid}")
     

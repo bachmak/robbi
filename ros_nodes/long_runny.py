@@ -50,7 +50,7 @@ class LongRunny(Node):
         super().__init__("long_runny")
 
         # Constants
-        self.immy_topic = "/immy"
+        self.imu_topic = "/sensi/imu"
         self.cmd_action_topic = "/cmd_action"
         self.control_period = 1 / 50.0
         self.fwd_vel = 0.08
@@ -73,7 +73,7 @@ class LongRunny(Node):
         self.integrator = 0.0
 
         # ROS2 entities
-        self.create_subscription(String, self.immy_topic, self.immy_callback, 10)
+        self.create_subscription(String, self.imu_topic, self.immy_callback, 10)
         self.twist_pub = self.create_publisher(Twist, self.cmd_vel_topic, 10)
         self.action_pub = self.create_publisher(Twist, self.cmd_action_topic, 10)
         self.timer = self.create_timer(self.control_period, self.update)
