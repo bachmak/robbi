@@ -25,10 +25,12 @@ class Robbi(Node):
         # Constants
         self.front_obstacle = 0.4
         self.forward_speed = 0.1
-        self.kp = 2.5
+        self.kp = 3.5
+        self.yaw_kp = 0.04
         self.turn_duration = 4
-        self.turn_angle = 180
-        self.max_dy = 0.05
+        self.turn_angle = 185
+        self.max_dy = 0.1
+        self.max_yaw = 8
         range_topic = '/sensi/us'
         cmd_vel_topic = '/cmd_vel'
         cmd_action_topic = '/cmd_action'
@@ -72,16 +74,25 @@ class Robbi(Node):
             return self.enter_follow()
         if state == "TURN":
             return self.enter_turn()
+        if state == "STOP":
+            return self.enter_stop()
 
 
     def update(self):
+        self.update_any()
+
         if self.state == "SEARCH":
             return self.update_search()
         if self.state == "FOLLOW":
             return self.update_follow()
         if self.state == "TURN":
             return self.update_turn()
+        if self.state == "STOP":
+            return self.update_stop()
     
+    def update_any(self):
+        if any(v and v[-1].value < 0.05 for v in self.ranges.values()):
+            self.switch_state("STOP")
 
     def enter_search(self):
         self.wall_side = None
@@ -117,15 +128,25 @@ class Robbi(Node):
             side = right
             direction = -1.0
 
-        error = side - self.desired_distance
-        angular = direction * (self.kp * error)
+        yaw = self.get_yaw()
 
-        self.get_logger().info(f"error={error}, angular={angular}, wall_side={self.wall_side} side={side}")
+        error = 0.0
+        angular = 0.0
+
+        if abs(yaw) > self.max_yaw:
+            error = yaw
+            angular = -yaw * self.yaw_kp
+        else:
+            error = side - self.target_distance
+            angular = direction * (self.kp * error)
+
+        self.get_logger().info(f"e={error}m, z={angular}d, wall={self.wall_side}, d={side}m, yaw={yaw}d, tg={self.target_distance}m")
         self.cmd_vel(self.forward_speed, angular)
     
 
     def enter_turn(self):
         turn_angle = self.turn_angle - self.get_yaw()
+        self.get_logger().info(f"turn_angle={turn_angle}, yaw={self.get_yaw()}")
         self.cmd_vel(0.0, 0.0)
         time.sleep(0.5)
         self.cmd_rotate(turn_angle, self.turn_duration)
@@ -137,11 +158,19 @@ class Robbi(Node):
             return
         
         self.invert_orientation()
-        self.switch_state("FOLLOW")
+        self.switch_state("SEARCH")
+
+
+    def enter_stop(self):
+        self.cmd_vel(0.0, 0.0)
+    
+
+    def update_stop(self):
+        return
     
 
     def is_waiting_for_data(self):
-        return any(len(v) == 0 for v in self.ranges.values()):
+        return any(len(v) == 0 for v in self.ranges.values())
 
     
     def init_wall_side(self):
@@ -154,13 +183,13 @@ class Robbi(Node):
 
     
     def invert_orientation(self):
-        if left < right:
-            self.wall_side = "left"
-        else
-            self.wall_side = "right"
-
         left = self.ranges["angle_0"][-1]
         right = self.ranges["angle_180"][-1]
+
+        if self.wall_side == "left":
+            self.wall_side = "right"
+        else:
+            self.wall_side = "left"
 
         self.ranges["angle_0"] = [Measurement(right.value, 0.0)]
         self.ranges["angle_180"] = [Measurement(left.value, 0.0)]
@@ -175,6 +204,8 @@ class Robbi(Node):
     
 
     def cmd_vel(self, x, z):
+        if z > 1.5 or z < -1.5:
+            self.get_logger().info(f"Z={z}")
         z = max(-1.5, min(1.5, z))
 
         twist = Twist()
@@ -210,7 +241,7 @@ class Robbi(Node):
 
         dt = last.t - prev.t
         dx = self.forward_speed * dt
-        dy = min(last.value - prev.value, self.max_dy)
+        dy = max(-self.max_dy, min(last.value - prev.value, self.max_dy))
 
         angle_rad = math.atan2(dy, dx)
         angle_deg = math.degrees(angle_rad)

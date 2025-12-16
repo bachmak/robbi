@@ -12,7 +12,7 @@ void rotate_async(Servo &servo, int position_deg)
     servo.write(position_deg);
 }
 
-float get_distance(int trig_pin, int echo_pin)
+float measure_single_distance(int trig_pin, int echo_pin, int pulse_timeout_us)
 {
     // turn off
     digitalWrite(trig_pin, LOW);
@@ -23,10 +23,48 @@ float get_distance(int trig_pin, int echo_pin)
     delayMicroseconds(10);
     digitalWrite(trig_pin, LOW);
 
-    auto duration = pulseIn(echo_pin, HIGH);
+    auto duration = pulseIn(echo_pin, HIGH, pulse_timeout_us);
+    if (duration == 0)
+    {
+        return -1.0f;
+    }
     auto distance = duration * 0.00034f / 2.0f; // us -> m
 
     return distance;
+}
+
+float get_distance(
+    int trig_pin,
+    int echo_pin,
+    int pulse_timeout_us,
+    float max_distance)
+{
+    auto measurements = std::array<float, 5>{};
+    for (auto &measurement : measurements)
+    {
+        measurement = measure_single_distance(trig_pin, echo_pin, pulse_timeout_us);
+    }
+
+    auto sum = 0.0f;
+    auto counter = 0;
+
+    for (const auto measurement : measurements)
+    {
+        if (measurement < 0.0f)
+        {
+            continue;
+        }
+
+        sum += measurement;
+        counter++;
+    }
+
+    if (counter == 0)
+    {
+        return max_distance;
+    }
+
+    return sum / counter;
 }
 
 struct USContext
@@ -43,6 +81,8 @@ struct USContext
     const int servo_pin = 12;
     const int trig_pin = 8;
     const int echo_pin = 9;
+    const int pulse_timeout_us = 8000;
+    const float max_distance = 1.0f;
 
     uint32_t last_update_time_ms = 0;
     const uint32_t update_interval_ms = 600;
@@ -106,7 +146,11 @@ void update(USContext &ctx)
         return;
     }
 
-    const auto distance = get_distance(ctx.trig_pin, ctx.echo_pin);
+    const auto distance = get_distance(
+        ctx.trig_pin,
+        ctx.echo_pin,
+        ctx.pulse_timeout_us,
+        ctx.max_distance);
 
     const auto prev_idx = ctx.last_position_idx;
     const auto next_idx = (prev_idx + 1) % static_cast<int>(ctx.measurement_positions.size());
