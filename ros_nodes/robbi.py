@@ -26,11 +26,9 @@ class Robbi(Node):
         self.front_obstacle = 0.4
         self.forward_speed = 0.1
         self.kp = 3.5
-        self.yaw_kp = 0.04
         self.turn_duration = 4
         self.turn_angle = 185
         self.max_dy = 0.1
-        self.max_yaw = 8
         range_topic = '/sensi/us'
         cmd_vel_topic = '/cmd_vel'
         cmd_action_topic = '/cmd_action'
@@ -130,15 +128,8 @@ class Robbi(Node):
 
         yaw = self.get_yaw()
 
-        error = 0.0
-        angular = 0.0
-
-        if abs(yaw) > self.max_yaw:
-            error = yaw
-            angular = -yaw * self.yaw_kp
-        else:
-            error = side - self.target_distance
-            angular = direction * (self.kp * error)
+        error = side - self.target_distance
+        angular = direction * (self.kp * error)
 
         self.get_logger().info(f"e={error}m, z={angular}d, wall={self.wall_side}, d={side}m, yaw={yaw}d, tg={self.target_distance}m")
         self.cmd_vel(self.forward_speed, angular)
