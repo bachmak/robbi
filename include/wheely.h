@@ -13,7 +13,7 @@ struct WheelySettings
 {
     WheelSettings left = {
         .motor = {
-            .pwm_deadband_fwd = Pwm{29},
+            .pwm_deadband_fwd = Pwm{30},
             .pwm_deadband_bwd = Pwm{27},
         },
     };
