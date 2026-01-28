@@ -1,13 +1,13 @@
 #pragma once
 
-#include "motor/motor.h"
+#include "robot/motor.h"
 #include "utils/geometry.h"
 
 namespace robot
 {
     struct WheelSettings
     {
-        robot::Settings motor = {};
+        robot::MotorSettings motor = {};
         Meter radius = Meter{0.0326};
     };
 

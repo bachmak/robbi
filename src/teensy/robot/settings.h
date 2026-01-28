@@ -6,7 +6,7 @@
 
 namespace robot
 {
-    struct Settings
+    struct MotorSettings
     {
         std::string name = "motor";
 

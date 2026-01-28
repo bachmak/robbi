@@ -1,8 +1,8 @@
 #pragma once
 
 #include "utils/non_copyable.h"
-#include "motor/settings.h"
-#include "motor/states.h"
+#include "robot/settings.h"
+#include "robot/states.h"
 
 #include <Servo.h>
 
@@ -14,7 +14,7 @@ namespace robot
     class Motor
     {
     public:
-        explicit Motor(const Settings &settings);
+        explicit Motor(const MotorSettings &settings);
         ~Motor();
 
         NON_COPYABLE(Motor)
@@ -30,7 +30,7 @@ namespace robot
 
     private:
         std::variant<VelocityControlState, PositionControlState> state_;
-        Settings settings_;
+        MotorSettings settings_;
         Servo servo_;
         std::optional<Pwm> pwm_override_;
         bool stop_ = false;

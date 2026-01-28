@@ -1,4 +1,4 @@
-#include "motor/motor.h"
+#include "robot/motor.h"
 
 #include "utils/pwm.h"
 #include "utils/geometry.h"
@@ -15,13 +15,13 @@ namespace robot
 {
     namespace
     {
-        void init_pins(const Settings &settings)
+        void init_pins(const MotorSettings &settings)
         {
             pinMode(settings.control_pin.v, OUTPUT);
             pinMode(settings.feedback_pin.v, INPUT);
         }
 
-        Degree read_position(const Settings &settings)
+        Degree read_position(const MotorSettings &settings)
         {
             const auto pwd_duration = utils::pwm::measure_pwm_duration(
                 settings.feedback_pin,
@@ -40,7 +40,7 @@ namespace robot
         }
     }
 
-    Motor::Motor(const Settings &settings)
+    Motor::Motor(const MotorSettings &settings)
         : state_(VelocityControlState{settings, (init_pins(settings), read_position(settings))}),
           settings_(settings)
     {

@@ -1,4 +1,4 @@
-#include "motor/states.h"
+#include "robot/states.h"
 
 #include "utils/io.h"
 #include "utils/geometry.h"
@@ -17,7 +17,7 @@ namespace robot
             return DegSec{angle.v / utils::time::to_sec(dt)};
         }
 
-        Pwm speed_to_pwm(DegSec speed, const Settings &settings)
+        Pwm speed_to_pwm(DegSec speed, const MotorSettings &settings)
         {
             const auto [zero_point, gain] = [&]() -> std::pair<Pwm, float>
             {
@@ -46,7 +46,7 @@ namespace robot
             Degree target_distance,
             Degree traveled_distance,
             DegSec speed,
-            const Settings &settings)
+            const MotorSettings &settings)
         {
             const auto tolerance = settings.stop_tolerance_base +
                                    Degree{settings.stop_tolerance_gain * abs(speed).v};
@@ -59,7 +59,7 @@ namespace robot
         }
     }
 
-    VelocityControlState::VelocityControlState(const Settings &settings, Degree curr_angle)
+    VelocityControlState::VelocityControlState(const MotorSettings &settings, Degree curr_angle)
         : settings_(settings),
           ramp_(settings_.ramp_rise_rate, settings_.ramp_fall_rate),
           speed_filter_(settings.speed_filter_alpha),
@@ -105,13 +105,13 @@ namespace robot
         target_speed_ = speed;
     }
 
-    void VelocityControlState::set_settings(const Settings &settings)
+    void VelocityControlState::set_settings(const MotorSettings &settings)
     {
         settings_ = settings;
     }
 
     PositionControlState::PositionControlState(
-        const Settings &settings,
+        const MotorSettings &settings,
         Degree start_angle,
         Degree target_distance,
         Us duration)
@@ -130,7 +130,7 @@ namespace robot
         return calc_pwm();
     }
 
-    void PositionControlState::set_settings(const Settings &settings)
+    void PositionControlState::set_settings(const MotorSettings &settings)
     {
         settings_ = settings;
     }
