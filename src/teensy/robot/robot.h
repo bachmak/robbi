@@ -1,29 +1,11 @@
 #pragma once
 
 #include "robot/motor.h"
+#include "robot/settings.h"
 #include "utils/geometry.h"
 
 namespace robot
 {
-    struct WheelSettings
-    {
-        robot::MotorSettings motor = {};
-        Meter radius = Meter{0.0326};
-    };
-
-    struct RobotSettings
-    {
-        WheelSettings left = {
-            .motor = {
-                .pwm_deadband_fwd = Pwm{30},
-                .pwm_deadband_bwd = Pwm{27},
-            },
-        };
-
-        WheelSettings right;
-        Meter width = Meter{0.102};
-    };
-
     class Robot
     {
     public:

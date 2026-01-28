@@ -44,4 +44,23 @@ namespace robot
         Degree stop_tolerance_base{0.0f};
         float stop_tolerance_gain{0.1};
     };
+
+    struct WheelSettings
+    {
+        robot::MotorSettings motor = {};
+        Meter radius = Meter{0.0326};
+    };
+
+    struct RobotSettings
+    {
+        WheelSettings left = {
+            .motor = {
+                .pwm_deadband_fwd = Pwm{30},
+                .pwm_deadband_bwd = Pwm{27},
+            },
+        };
+
+        WheelSettings right;
+        Meter width = Meter{0.102};
+    };
 }
