@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-namespace common_utils
+namespace utils::common
 {
     template <class... Ts>
     struct overloads : Ts...

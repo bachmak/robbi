@@ -1,6 +1,6 @@
-#include "common.h"
+#include "types.h"
 
-namespace pwm_utils
+namespace utils::pwm
 {
     struct CycleDuration
     {

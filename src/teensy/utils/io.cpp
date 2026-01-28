@@ -1,4 +1,4 @@
-#include "io_utils.h"
+#include "io.h"
 
 #include "ros/publisher.h"
 
@@ -15,7 +15,7 @@ constexpr auto color_green = "\033[32m";
 constexpr auto color_yellow = "\033[33m";
 constexpr auto color_blue = "\033[34m";
 
-namespace io_utils
+namespace utils::io
 {
     namespace
     {

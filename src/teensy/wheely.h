@@ -1,7 +1,7 @@
 #pragma once
 
 #include "motor/motor.h"
-#include "geo_utils.h"
+#include "utils/geometry.h"
 
 struct WheelSettings
 {
@@ -30,7 +30,7 @@ public:
 public:
     void update(Us dt);
 
-    void set_target_speed(const geo_utils::Twist &twist);
+    void set_target_speed(const utils::geometry::Twist &twist);
     void set_target_distance(Meter distance, Us duration);
     void set_target_rotation(Degree rotation, Us duration);
     void set_stop(bool value);

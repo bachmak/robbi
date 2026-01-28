@@ -1,6 +1,6 @@
 #pragma once
 
-#include "geo_utils.h"
+#include "utils/geometry.h"
 
 #include <std_msgs/msg/int32.h>
 #include <std_msgs/msg/float32.h>
@@ -64,7 +64,7 @@ namespace ros
     };
 
     template <>
-    struct MessageTraits<geo_utils::Twist>
+    struct MessageTraits<utils::geometry::Twist>
     {
         using RclMessageType = geometry_msgs__msg__Twist;
 
@@ -73,7 +73,7 @@ namespace ros
             return ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist);
         }
 
-        static auto to_message(const geo_utils::Twist &twist)
+        static auto to_message(const utils::geometry::Twist &twist)
         {
             return RclMessageType{
                 .linear = {
@@ -94,7 +94,7 @@ namespace ros
             auto to_f = [](double a)
             { return static_cast<float>(a); };
 
-            return geo_utils::Twist{
+            return utils::geometry::Twist{
                 .linear = {
                     .x = to_f(msg->linear.x),
                     .y = to_f(msg->linear.y),

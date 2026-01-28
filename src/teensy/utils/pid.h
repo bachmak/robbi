@@ -1,10 +1,9 @@
 #pragma once
 
-#include "common.h"
+#include "types.h"
 
-namespace utils::control
+namespace utils::pid
 {
-
     struct PIDSettings
     {
         float G;

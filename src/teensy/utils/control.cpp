@@ -1,6 +1,6 @@
 #include "utils/control.h"
 
-#include "io_utils.h"
+#include "utils/io.h"
 
 #include <utility>
 #include <algorithm>
@@ -87,7 +87,7 @@ namespace utils::control
         }
         else
         {
-            io_utils::error("PID: unknown setting: %s", setting.data());
+            io::error("PID: unknown setting: %s", setting.data());
         }
 
         params_ = to_params(settings_);
@@ -131,7 +131,7 @@ namespace utils::control
         }
         else
         {
-            io_utils::error("Ramp: unknown setting: %s", setting.data());
+            io::error("Ramp: unknown setting: %s", setting.data());
         }
     }
 }

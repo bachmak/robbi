@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common.h"
+#include "types.h"
 
 #include <Print.h>
 
@@ -13,7 +13,7 @@ namespace ros
     class Publisher;
 }
 
-namespace io_utils
+namespace utils::io
 {
     enum class LogLevel
     {

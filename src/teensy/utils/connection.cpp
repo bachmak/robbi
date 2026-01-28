@@ -1,7 +1,8 @@
 #include "utils/connection.h"
 
+#include "utils/time.h"
+
 #include "rmw_microros/ping.h"
-#include "time_utils.h"
 
 namespace utils::connection
 {
@@ -12,7 +13,7 @@ namespace utils::connection
         DISCONNECTED,
     };
 
-    State check_connection(time_utils::Timer &timer, Ms ping_timeout)
+    State check_connection(time::Timer &timer, Ms ping_timeout)
     {
         if (timer.is_over())
         {
@@ -30,12 +31,12 @@ namespace utils::connection
         return State::WAITING;
     }
 
-    bool is_connected(time_utils::Timer &timer, Ms ping_timeout)
+    bool is_connected(time::Timer &timer, Ms ping_timeout)
     {
         return check_connection(timer, ping_timeout) == State::CONNECTED;
     }
 
-    bool is_disconnected(time_utils::Timer &timer, Ms ping_timeout)
+    bool is_disconnected(time::Timer &timer, Ms ping_timeout)
     {
         return check_connection(timer, ping_timeout) == State::DISCONNECTED;
     }

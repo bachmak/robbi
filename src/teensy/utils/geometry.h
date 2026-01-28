@@ -1,8 +1,8 @@
 #pragma once
 
-#include "common.h"
+#include "types.h"
 
-namespace geo_utils
+namespace utils::geometry
 {
     Meter to_distance(Degree angle, Meter circumference);
     Degree to_angle(Meter distance, Meter circumference);

@@ -1,8 +1,8 @@
-#include "pwm_utils.h"
+#include "pwm.h"
 
 #include <Arduino.h>
 
-namespace pwm_utils
+namespace utils::pwm
 {
     float to_duty_cycle(CycleDuration duration)
     {

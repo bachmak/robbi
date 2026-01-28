@@ -1,8 +1,8 @@
-#include "geo_utils.h"
+#include "geometry.h"
 
 #include <math.h>
 
-namespace geo_utils
+namespace utils::geometry
 {
     namespace
     {

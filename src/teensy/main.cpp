@@ -4,8 +4,8 @@
 #include "ros/executor.h"
 #include "ros/publisher.h"
 #include "ros/timer.h"
-#include "io_utils.h"
-#include "time_utils.h"
+#include "utils/io.h"
+#include "utils/time.h"
 #include "wheely.h"
 #include "wheely_configurator.h"
 #include "utils/connection.h"
@@ -14,10 +14,10 @@
 
 struct Config
 {
-    io_utils::Settings io_setings{
+    utils::io::Settings io_setings{
         .serial_baud = 115200,
-        .log_level = io_utils::LogLevel::DEBUG,
-        .serial_redirect = io_utils::SerialRedirect::MICRO_ROS,
+        .log_level = utils::io::LogLevel::DEBUG,
+        .serial_redirect = utils::io::SerialRedirect::MICRO_ROS,
         .delay_after_init = Ms{1000},
     };
 
@@ -59,7 +59,7 @@ struct Config
 
 void do_loop(const Config &config)
 {
-    auto ping_timer = time_utils::Timer{
+    auto ping_timer = utils::time::Timer{
         config.ping_interval,
         // adjusted start point for timer to avoid waiting the first time
         -config.ping_interval,
@@ -70,13 +70,13 @@ void do_loop(const Config &config)
 
     auto support = ros::Support{};
     auto node = ros::Node{support, config.node_name};
-    auto cmd_vel_echo_publisher = ros::Publisher<geo_utils::Twist>{
+    auto cmd_vel_echo_publisher = ros::Publisher<utils::geometry::Twist>{
         node,
         config.cmd_vel_echo_topic,
     };
 
     auto log_publisher = ros::Publisher<std::string_view>{node, config.logs_topic};
-    io_utils::redirect_to(log_publisher);
+    utils::io::redirect_to(log_publisher);
 
     auto echo_publisher = ros::Publisher<std::string_view>{node, config.echo_pub_topic};
 
@@ -88,19 +88,19 @@ void do_loop(const Config &config)
         config.config_topic,
         [&](std::string_view str)
         {
-            io_utils::debug(
+            utils::io::debug(
                 "WheelyConfiguration: received message: %.*s",
                 static_cast<int>(str.size()),
                 str.data());
 
-            const auto tokens = common_utils::split(str);
+            const auto tokens = utils::common::split(str);
             if (tokens.size() != 2)
             {
                 return;
             }
 
             const auto setting = tokens[0];
-            const auto value = common_utils::str_to_float(tokens[1]);
+            const auto value = utils::common::str_to_float(tokens[1]);
             if (!value.has_value())
             {
                 return;
@@ -115,7 +115,7 @@ void do_loop(const Config &config)
                 wheely.configure(setting, *value);
             }
 
-            io_utils::info(
+            utils::io::info(
                 "WheelyConfiguration: applying setting: %.*s = %f",
                 static_cast<int>(setting.size()),
                 setting.data(),
@@ -125,10 +125,10 @@ void do_loop(const Config &config)
         },
     };
 
-    auto cmd_vel_sub = ros::Subscription<geo_utils::Twist>{
+    auto cmd_vel_sub = ros::Subscription<utils::geometry::Twist>{
         node,
         config.cmd_vel_topic,
-        [&](const geo_utils::Twist &twist)
+        [&](const utils::geometry::Twist &twist)
         {
             cmd_vel_echo_publisher.publish(twist);
             wheely.set_target_speed(twist);
@@ -139,7 +139,7 @@ void do_loop(const Config &config)
         config.cmd_action_topic,
         [&wheely](std::string_view cmd)
         {
-            const auto tokens = common_utils::split(cmd);
+            const auto tokens = utils::common::split(cmd);
             if (tokens.size() < 0)
             {
                 return;
@@ -159,8 +159,8 @@ void do_loop(const Config &config)
                 return;
             }
 
-            const auto param_1 = common_utils::str_to_float(tokens[1]);
-            const auto param_2 = common_utils::str_to_float(tokens[2]);
+            const auto param_1 = utils::common::str_to_float(tokens[1]);
+            const auto param_2 = utils::common::str_to_float(tokens[2]);
             if (!param_1.has_value() || !param_2.has_value())
             {
                 return;
@@ -206,9 +206,9 @@ void do_loop(const Config &config)
 
         if (CrashReport)
         {
-            auto p = io_utils::StringPrint{};
+            auto p = utils::io::StringPrint{};
             CrashReport.printTo(p);
-            io_utils::debug("there is a crash report:\n%s", p.buffer.c_str());
+            utils::io::debug("there is a crash report:\n%s", p.buffer.c_str());
         }
 
         executor.spin_some(config.spin_timeout);
@@ -217,13 +217,13 @@ void do_loop(const Config &config)
         delay(main_loop_delay.count());
     }
 
-    io_utils::redirect_reset();
+    utils::io::redirect_reset();
 }
 
 void run()
 {
     const auto config = Config{};
-    io_utils::init(config.io_setings);
+    utils::io::init(config.io_setings);
     pinMode(config.main_loop_pin.v, OUTPUT);
 
     while (true)

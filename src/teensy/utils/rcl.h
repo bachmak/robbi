@@ -1,6 +1,6 @@
 #pragma once
 
-#include "io_utils.h"
+#include "utils/io.h"
 
 #include <rcl/types.h>
 
@@ -10,7 +10,7 @@ namespace ros
     {
         if (ret != RCL_RET_OK)
         {
-            io_utils::error("%s:%d: error: %d. Endless loop entered", ret, file, line);
+            utils::io::error("%s:%d: error: %d. Endless loop entered", ret, file, line);
             while (1)
             {
             }

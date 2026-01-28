@@ -1,9 +1,9 @@
 #include "motor/motor.h"
 
-#include "pwm_utils.h"
-#include "geo_utils.h"
-#include "common_utils.h"
-#include "io_utils.h"
+#include "utils/pwm.h"
+#include "utils/geometry.h"
+#include "utils/common.h"
+#include "utils/io.h"
 
 #include <Servo.h>
 #include <Arduino.h>
@@ -23,12 +23,12 @@ namespace motor
 
         Degree read_position(const Settings &settings)
         {
-            const auto pwd_duration = pwm_utils::measure_pwm_duration(
+            const auto pwd_duration = utils::pwm::measure_pwm_duration(
                 settings.feedback_pin,
                 settings.feedback_pwm_min,
                 settings.feedback_pwm_max);
 
-            const auto dc = pwm_utils::to_duty_cycle(pwd_duration);
+            const auto dc = utils::pwm::to_duty_cycle(pwd_duration);
             const auto dc_min = settings.feedback_pwm_duty_cycle_min;
             const auto dc_max = settings.feedback_pwm_duty_cycle_max;
 
@@ -76,16 +76,16 @@ namespace motor
 
     void Motor::set_target_speed(DegSec speed)
     {
-        std::visit(common_utils::overloads{[speed](VelocityControlState &state)
-                                           {
-                                               state.set_target_speed(speed);
-                                           },
-                                           [&](PositionControlState &state)
-                                           {
-                                               auto curr_angle = read_position(settings_);
-                                               state_ = VelocityControlState(settings_, curr_angle);
-                                               set_target_speed(speed);
-                                           }},
+        std::visit(utils::common::overloads{[speed](VelocityControlState &state)
+                                            {
+                                                state.set_target_speed(speed);
+                                            },
+                                            [&](PositionControlState &state)
+                                            {
+                                                auto curr_angle = read_position(settings_);
+                                                state_ = VelocityControlState(settings_, curr_angle);
+                                                set_target_speed(speed);
+                                            }},
                    state_);
     }
 
@@ -193,7 +193,7 @@ namespace motor
         }
         else
         {
-            io_utils::error("Motor: unknown settins: %s", s.data());
+            utils::io::error("Motor: unknown settins: %s", s.data());
         }
 
         std::visit([this](auto &state)

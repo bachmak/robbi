@@ -1,8 +1,8 @@
 #include "motor/states.h"
 
-#include "io_utils.h"
-#include "geo_utils.h"
-#include "time_utils.h"
+#include "utils/io.h"
+#include "utils/geometry.h"
+#include "utils/time.h"
 
 #include <Arduino.h>
 
@@ -14,7 +14,7 @@ namespace motor
     {
         DegSec to_speed(Degree angle, Us dt)
         {
-            return DegSec{angle.v / time_utils::to_sec(dt)};
+            return DegSec{angle.v / utils::time::to_sec(dt)};
         }
 
         Pwm speed_to_pwm(DegSec speed, const Settings &settings)
@@ -70,11 +70,11 @@ namespace motor
     Pwm VelocityControlState::update(Us dt, Degree curr_angle)
     {
         const auto prev_angle = std::exchange(last_angle_, curr_angle);
-        const auto delta_angle = geo_utils::to_delta(curr_angle, prev_angle);
+        const auto delta_angle = utils::geometry::to_delta(curr_angle, prev_angle);
 
         const auto speed_raw = to_speed(delta_angle, dt);
         const auto speed = DegSec{speed_filter_.update(speed_raw.v)};
-        const auto setpoint_speed = DegSec{ramp_.update(target_speed_.v, time_utils::to_sec(dt))};
+        const auto setpoint_speed = DegSec{ramp_.update(target_speed_.v, utils::time::to_sec(dt))};
 
         const auto ff_pwm = speed_to_pwm(setpoint_speed, settings_);
         const auto pwm_correction = Pwm{settings_.G_vel * (target_speed_.v - speed.v)};
@@ -83,18 +83,18 @@ namespace motor
 
         if (settings_.log)
         {
-            io_utils::debug("%s: state=vel-ctl, "
-                            "err=%f, speed=(tg:%.2f,sp:%.2f,r:%.2f,f:%.2f), "
-                            "pwm=(%d+%d=%d)",
-                            settings_.name.c_str(),
-                            target_speed_.v - speed.v,
-                            target_speed_.v,
-                            setpoint_speed.v,
-                            speed_raw.v,
-                            speed.v,
-                            ff_pwm.v,
-                            pwm_correction.v,
-                            pwm.v);
+            utils::io::debug("%s: state=vel-ctl, "
+                             "err=%f, speed=(tg:%.2f,sp:%.2f,r:%.2f,f:%.2f), "
+                             "pwm=(%d+%d=%d)",
+                             settings_.name.c_str(),
+                             target_speed_.v - speed.v,
+                             target_speed_.v,
+                             setpoint_speed.v,
+                             speed_raw.v,
+                             speed.v,
+                             ff_pwm.v,
+                             pwm_correction.v,
+                             pwm.v);
         }
 
         return pwm;
@@ -118,7 +118,7 @@ namespace motor
         : settings_(settings),
           start_angle_{start_angle},
           target_distance_{target_distance},
-          target_speed_{target_distance.v / time_utils::to_sec(duration)},
+          target_speed_{target_distance.v / utils::time::to_sec(duration)},
           full_angle_{start_angle}
     {
     }
@@ -126,7 +126,7 @@ namespace motor
     Pwm PositionControlState::update(Us dt, Degree curr_angle)
     {
         elapsed_time_ += dt;
-        full_angle_ = geo_utils::to_full(curr_angle, full_angle_);
+        full_angle_ = utils::geometry::to_full(curr_angle, full_angle_);
         return calc_pwm();
     }
 
@@ -138,7 +138,7 @@ namespace motor
     Pwm PositionControlState::calc_pwm() const
     {
         const auto traveled_distance = full_angle_ - start_angle_;
-        const auto setpoint_distance = Degree{target_speed_.v * time_utils::to_sec(elapsed_time_)};
+        const auto setpoint_distance = Degree{target_speed_.v * utils::time::to_sec(elapsed_time_)};
 
         const auto err = setpoint_distance - traveled_distance;
 
@@ -158,17 +158,17 @@ namespace motor
 
         if (settings_.log)
         {
-            io_utils::debug("%s: state=pos-ctl, "
-                            "err=%f, dist=(tg:%.2f,sp:%.2f,r:%.2f), "
-                            "pwm=(%d+%d=%d)",
-                            settings_.name.c_str(),
-                            err.v,
-                            target_distance_.v,
-                            setpoint_distance.v,
-                            traveled_distance.v,
-                            pwm_base.v,
-                            pwm_correction.v,
-                            pwm.v);
+            utils::io::debug("%s: state=pos-ctl, "
+                             "err=%f, dist=(tg:%.2f,sp:%.2f,r:%.2f), "
+                             "pwm=(%d+%d=%d)",
+                             settings_.name.c_str(),
+                             err.v,
+                             target_distance_.v,
+                             setpoint_distance.v,
+                             traveled_distance.v,
+                             pwm_base.v,
+                             pwm_correction.v,
+                             pwm.v);
         }
 
         return pwm;

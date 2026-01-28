@@ -2,7 +2,8 @@
 
 #include "ros/subscription.h"
 #include "wheely.h"
-#include "common_utils.h"
+#include "utils/common.h"
+#include "utils/io.h"
 
 class WheelyConfigurator
 {
@@ -21,25 +22,25 @@ public:
 private:
     void configure(std::string_view str)
     {
-        io_utils::debug(
+        utils::io::debug(
             "WheelyConfiguration: received message: %.*s",
             static_cast<int>(str.size()),
             str.data());
 
-        const auto tokens = common_utils::split(str);
+        const auto tokens = utils::common::split(str);
         if (tokens.size() != 2)
         {
             return;
         }
 
         const auto setting = tokens[0];
-        const auto value = common_utils::str_to_float(tokens[1]);
+        const auto value = utils::common::str_to_float(tokens[1]);
         if (!value.has_value())
         {
             return;
         }
 
-        io_utils::info(
+        utils::io::info(
             "WheelyConfiguration: applying setting: %.*s = %f",
             static_cast<int>(setting.size()),
             setting.data(),

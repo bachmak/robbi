@@ -1,8 +1,8 @@
-#include "common.h"
+#include "types.h"
 
 #include <Arduino.h>
 
-namespace time_utils
+namespace utils::time
 {
     class StopWatch
     {

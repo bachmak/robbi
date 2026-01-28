@@ -1,8 +1,8 @@
 #include "wheely.h"
 
-#include "common_utils.h"
-#include "io_utils.h"
-#include "time_utils.h"
+#include "utils/common.h"
+#include "utils/io.h"
+#include "utils/time.h"
 
 namespace
 {
@@ -19,7 +19,7 @@ namespace
     };
 
     MotorSpeeds to_motor_speeds(
-        const geo_utils::Twist &twist,
+        const utils::geometry::Twist &twist,
         const WheelySettings &settings)
     {
         const auto v = twist.linear.x;
@@ -79,11 +79,11 @@ void Wheely::update(Us dt)
     right_.update(dt);
 }
 
-void Wheely::set_target_speed(const geo_utils::Twist &twist)
+void Wheely::set_target_speed(const utils::geometry::Twist &twist)
 {
     const auto speeds = to_motor_speeds(twist, settings_);
 
-    io_utils::debug(
+    utils::io::debug(
         "Setting new speed: left = %.2f deg/sec, right = %.2f deg/sec",
         speeds.left.v,
         speeds.right.v);
@@ -96,11 +96,11 @@ void Wheely::set_target_distance(Meter distance, Us duration)
 {
     const auto positions = to_motor_positions(distance, -distance, settings_);
 
-    io_utils::info(
+    utils::io::info(
         "Setting new positions: left = %.2f deg, right = %.2f deg, duration = %.2f s",
         positions.left.v,
         positions.right.v,
-        time_utils::to_sec(duration));
+        utils::time::to_sec(duration));
 
     left_.set_target_distance(positions.left, duration);
     right_.set_target_distance(positions.right, duration);
@@ -110,11 +110,11 @@ void Wheely::set_target_rotation(Degree rotation, Us duration)
 {
     const auto positions = to_motor_positions(rotation, settings_);
 
-    io_utils::info(
+    utils::io::info(
         "Setting new positions: left = %.2f deg, right = %.2f deg, duration = %.2f s",
         positions.left.v,
         positions.right.v,
-        time_utils::to_sec(duration));
+        utils::time::to_sec(duration));
 
     left_.set_target_distance(positions.left, duration);
     right_.set_target_distance(positions.right, duration);
@@ -122,7 +122,7 @@ void Wheely::set_target_rotation(Degree rotation, Us duration)
 
 void Wheely::set_stop(bool value)
 {
-    io_utils::debug("Setting stop: stop = %s", value ? "true" : "false");
+    utils::io::debug("Setting stop: stop = %s", value ? "true" : "false");
 
     left_.set_stop(value);
     right_.set_stop(value);
@@ -130,7 +130,7 @@ void Wheely::set_stop(bool value)
 
 void Wheely::configure(std::string_view setting, float value)
 {
-    using common_utils::substr_after;
+    using utils::common::substr_after;
 
     auto configure_wheel = [&](WheelSettings &settings, motor::Motor &motor, std::string_view subsetting)
     {
@@ -144,11 +144,11 @@ void Wheely::configure(std::string_view setting, float value)
         }
     };
 
-    if (auto subsetting = common_utils::substr_after(setting, "left."))
+    if (auto subsetting = utils::common::substr_after(setting, "left."))
     {
         configure_wheel(settings_.left, left_, *subsetting);
     }
-    else if (auto subsetting = common_utils::substr_after(setting, "right."))
+    else if (auto subsetting = utils::common::substr_after(setting, "right."))
     {
         configure_wheel(settings_.right, right_, *subsetting);
     }
@@ -164,6 +164,6 @@ void Wheely::configure(std::string_view setting, float value)
     }
     else
     {
-        io_utils::error("Wheely: unknown setting: %s", setting.data());
+        utils::io::error("Wheely: unknown setting: %s", setting.data());
     }
 }

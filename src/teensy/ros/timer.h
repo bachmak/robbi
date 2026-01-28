@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common.h"
+#include "types.h"
 #include "utils/non_copyable.h"
 #include "ros/executor.h"
 

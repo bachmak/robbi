@@ -1,8 +1,8 @@
-#include "common_utils.h"
+#include "utils/common.h"
 
 #include <algorithm>
 
-namespace common_utils
+namespace utils::common
 {
     std::string_view trim(const std::string_view &str)
     {
