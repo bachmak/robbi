@@ -8,7 +8,7 @@
 
 #include <utility>
 
-namespace robot
+namespace robot::states
 {
     namespace
     {
@@ -59,7 +59,7 @@ namespace robot
         }
     }
 
-    VelocityControlState::VelocityControlState(const MotorSettings &settings, Degree curr_angle)
+    VelocityControl::VelocityControl(const MotorSettings &settings, Degree curr_angle)
         : settings_(settings),
           ramp_(settings_.ramp_rise_rate, settings_.ramp_fall_rate),
           speed_filter_(settings.speed_filter_alpha),
@@ -67,7 +67,7 @@ namespace robot
     {
     }
 
-    Pwm VelocityControlState::update(Us dt, Degree curr_angle)
+    Pwm VelocityControl::update(Us dt, Degree curr_angle)
     {
         const auto prev_angle = std::exchange(last_angle_, curr_angle);
         const auto delta_angle = utils::geometry::to_delta(curr_angle, prev_angle);
@@ -100,17 +100,17 @@ namespace robot
         return pwm;
     }
 
-    void VelocityControlState::set_target_speed(DegSec speed)
+    void VelocityControl::set_target_speed(DegSec speed)
     {
         target_speed_ = speed;
     }
 
-    void VelocityControlState::set_settings(const MotorSettings &settings)
+    void VelocityControl::set_settings(const MotorSettings &settings)
     {
         settings_ = settings;
     }
 
-    PositionControlState::PositionControlState(
+    PositionControl::PositionControl(
         const MotorSettings &settings,
         Degree start_angle,
         Degree target_distance,
@@ -123,19 +123,19 @@ namespace robot
     {
     }
 
-    Pwm PositionControlState::update(Us dt, Degree curr_angle)
+    Pwm PositionControl::update(Us dt, Degree curr_angle)
     {
         elapsed_time_ += dt;
         full_angle_ = utils::geometry::to_full(curr_angle, full_angle_);
         return calc_pwm();
     }
 
-    void PositionControlState::set_settings(const MotorSettings &settings)
+    void PositionControl::set_settings(const MotorSettings &settings)
     {
         settings_ = settings;
     }
 
-    Pwm PositionControlState::calc_pwm() const
+    Pwm PositionControl::calc_pwm() const
     {
         const auto traveled_distance = full_angle_ - start_angle_;
         const auto setpoint_distance = Degree{target_speed_.v * utils::time::to_sec(elapsed_time_)};

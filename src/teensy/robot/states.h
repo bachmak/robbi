@@ -4,12 +4,12 @@
 #include "utils/control.h"
 #include "utils/math.h"
 
-namespace robot
+namespace robot::states
 {
-    class VelocityControlState
+    class VelocityControl
     {
     public:
-        explicit VelocityControlState(const MotorSettings &settings, Degree curr_angle);
+        explicit VelocityControl(const MotorSettings &settings, Degree curr_angle);
 
         Pwm update(Us dt, Degree position);
 
@@ -24,10 +24,10 @@ namespace robot
         Degree last_angle_;
     };
 
-    class PositionControlState
+    class PositionControl
     {
     public:
-        explicit PositionControlState(
+        explicit PositionControl(
             const MotorSettings &settings,
             Degree start_angle,
             Degree target_distance,

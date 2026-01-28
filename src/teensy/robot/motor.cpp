@@ -41,7 +41,7 @@ namespace robot
     }
 
     Motor::Motor(const MotorSettings &settings)
-        : state_(VelocityControlState{settings, (init_pins(settings), read_position(settings))}),
+        : state_(states::VelocityControl{settings, (init_pins(settings), read_position(settings))}),
           settings_(settings)
     {
         servo_.attach(settings_.control_pin.v);
@@ -76,14 +76,14 @@ namespace robot
 
     void Motor::set_target_speed(DegSec speed)
     {
-        std::visit(utils::visitor::overloads{[speed](VelocityControlState &state)
+        std::visit(utils::visitor::overloads{[speed](states::VelocityControl &state)
                                              {
                                                  state.set_target_speed(speed);
                                              },
-                                             [&](PositionControlState &state)
+                                             [&](states::PositionControl &state)
                                              {
                                                  auto curr_angle = read_position(settings_);
-                                                 state_ = VelocityControlState(settings_, curr_angle);
+                                                 state_ = states::VelocityControl(settings_, curr_angle);
                                                  set_target_speed(speed);
                                              }},
                    state_);
@@ -92,7 +92,7 @@ namespace robot
     void Motor::set_target_distance(Degree target_distance, Us duration)
     {
         auto curr_angle = read_position(settings_);
-        state_ = PositionControlState(settings_, curr_angle, target_distance, duration);
+        state_ = states::PositionControl(settings_, curr_angle, target_distance, duration);
     }
 
     void Motor::set_stop(bool value) { stop_ = value; }
@@ -103,7 +103,7 @@ namespace robot
 
         if (s == "speed")
         {
-            if (auto state = std::get_if<VelocityControlState>(&state_))
+            if (auto state = std::get_if<states::VelocityControl>(&state_))
             {
                 state->set_target_speed(DegSec{value});
             }

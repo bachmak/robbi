@@ -29,7 +29,11 @@ namespace robot
         void configure(std::string_view setting, float value);
 
     private:
-        std::variant<VelocityControlState, PositionControlState> state_;
+        using State = std::variant<
+            states::VelocityControl,
+            states::PositionControl>;
+
+        State state_;
         MotorSettings settings_;
         Servo servo_;
         std::optional<Pwm> pwm_override_;
