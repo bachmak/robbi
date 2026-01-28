@@ -7,7 +7,7 @@ namespace robot
 {
     struct WheelSettings
     {
-        motor::Settings motor = {};
+        robot::Settings motor = {};
         Meter radius = Meter{0.0326};
     };
 
@@ -41,7 +41,7 @@ namespace robot
 
     private:
         RobotSettings settings_;
-        motor::Motor left_;
-        motor::Motor right_;
+        robot::Motor left_;
+        robot::Motor right_;
     };
 }

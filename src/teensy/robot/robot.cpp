@@ -134,7 +134,7 @@ namespace robot
     {
         using utils::str::substr_after;
 
-        auto configure_wheel = [&](WheelSettings &settings, motor::Motor &motor, std::string_view subsetting)
+        auto configure_wheel = [&](WheelSettings &settings, robot::Motor &motor, std::string_view subsetting)
         {
             if (auto motor_setting = substr_after(subsetting, "motor."))
             {

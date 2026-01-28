@@ -9,7 +9,7 @@
 #include <variant>
 #include <optional>
 
-namespace motor
+namespace robot
 {
     class Motor
     {

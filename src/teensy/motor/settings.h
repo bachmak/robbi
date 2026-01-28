@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace motor
+namespace robot
 {
     struct Settings
     {

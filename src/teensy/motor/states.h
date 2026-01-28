@@ -4,7 +4,7 @@
 #include "utils/control.h"
 #include "utils/math.h"
 
-namespace motor
+namespace robot
 {
     class VelocityControlState
     {

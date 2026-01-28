@@ -11,7 +11,7 @@
 #include <utility>
 #include <algorithm>
 
-namespace motor
+namespace robot
 {
     namespace
     {

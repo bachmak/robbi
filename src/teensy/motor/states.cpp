@@ -8,7 +8,7 @@
 
 #include <utility>
 
-namespace motor
+namespace robot
 {
     namespace
     {
