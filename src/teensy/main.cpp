@@ -7,8 +7,8 @@
 #include "ros/timer.h"
 #include "utils/io.h"
 #include "utils/time.h"
-#include "wheely.h"
-#include "wheely_configurator.h"
+#include "robot/robot.h"
+#include "robot/configurator.h"
 
 #include <CrashReport.h>
 
@@ -21,7 +21,7 @@ struct Config
         .delay_after_init = Ms{1000},
     };
 
-    WheelySettings wheely_settings = {
+    robot::RobotSettings robot_settings = {
         .left = {
             .motor = {
                 .name = "left-wheel",
@@ -38,13 +38,13 @@ struct Config
         },
     };
 
-    const char *node_name = "wheely";
+    const char *node_name = "robot";
 
     const char *cmd_vel_topic = "cmd_vel";
     const char *cmd_action_topic = "cmd_action";
     const char *cmd_vel_echo_topic = "cmd_vel_echo";
     const char *logs_topic = "logs";
-    const char *config_topic = "wheely_config";
+    const char *config_topic = "robot_config";
     const char *echo_sub_topic = "echo_request";
     const char *echo_pub_topic = "echo_response";
 
@@ -80,7 +80,7 @@ void do_loop(const Config &config)
 
     auto echo_publisher = ros::Publisher<std::string_view>{node, config.echo_pub_topic};
 
-    auto wheely = Wheely{config.wheely_settings};
+    auto robot = robot::Robot{config.robot_settings};
     auto main_loop_delay = Ms{0};
 
     auto cfg_sub = ros::Subscription<std::string_view>{
@@ -89,7 +89,7 @@ void do_loop(const Config &config)
         [&](std::string_view str)
         {
             utils::io::debug(
-                "WheelyConfiguration: received message: %.*s",
+                "RobotConfiguration: received message: %.*s",
                 static_cast<int>(str.size()),
                 str.data());
 
@@ -112,16 +112,16 @@ void do_loop(const Config &config)
             }
             else
             {
-                wheely.configure(setting, *value);
+                robot.configure(setting, *value);
             }
 
             utils::io::info(
-                "WheelyConfiguration: applying setting: %.*s = %f",
+                "RobotConfiguration: applying setting: %.*s = %f",
                 static_cast<int>(setting.size()),
                 setting.data(),
                 *value);
 
-            wheely.configure(setting, *value);
+            robot.configure(setting, *value);
         },
     };
 
@@ -131,13 +131,13 @@ void do_loop(const Config &config)
         [&](const utils::geometry::Twist &twist)
         {
             cmd_vel_echo_publisher.publish(twist);
-            wheely.set_target_speed(twist);
+            robot.set_target_speed(twist);
         }};
 
     auto cmd_action_sub = ros::Subscription<std::string_view>{
         node,
         config.cmd_action_topic,
-        [&wheely](std::string_view cmd)
+        [&robot](std::string_view cmd)
         {
             const auto tokens = utils::str::split(cmd);
             if (tokens.size() < 0)
@@ -148,11 +148,11 @@ void do_loop(const Config &config)
             const auto action = tokens[0];
             if (action == "stop")
             {
-                return wheely.set_stop(true);
+                return robot.set_stop(true);
             }
             if (action == "go")
             {
-                return wheely.set_stop(false);
+                return robot.set_stop(false);
             }
             if (tokens.size() < 2)
             {
@@ -169,11 +169,11 @@ void do_loop(const Config &config)
             const auto duration = Us{static_cast<int64_t>(*param_2 * 1'000'000)};
             if (action == "move")
             {
-                return wheely.set_target_distance(Meter{*param_1}, duration);
+                return robot.set_target_distance(Meter{*param_1}, duration);
             }
             if (action == "rotate")
             {
-                return wheely.set_target_rotation(Degree{*param_1}, duration);
+                return robot.set_target_rotation(Degree{*param_1}, duration);
             }
         }};
 
@@ -212,7 +212,7 @@ void do_loop(const Config &config)
         }
 
         executor.spin_some(config.spin_timeout);
-        wheely.update(dt);
+        robot.update(dt);
 
         delay(main_loop_delay.count());
     }
