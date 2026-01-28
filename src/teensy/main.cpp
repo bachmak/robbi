@@ -93,14 +93,14 @@ void do_loop(const Config &config)
                 static_cast<int>(str.size()),
                 str.data());
 
-            const auto tokens = utils::common::split(str);
+            const auto tokens = utils::str::split(str);
             if (tokens.size() != 2)
             {
                 return;
             }
 
             const auto setting = tokens[0];
-            const auto value = utils::common::str_to_float(tokens[1]);
+            const auto value = utils::str::str_to_float(tokens[1]);
             if (!value.has_value())
             {
                 return;
@@ -139,7 +139,7 @@ void do_loop(const Config &config)
         config.cmd_action_topic,
         [&wheely](std::string_view cmd)
         {
-            const auto tokens = utils::common::split(cmd);
+            const auto tokens = utils::str::split(cmd);
             if (tokens.size() < 0)
             {
                 return;
@@ -159,8 +159,8 @@ void do_loop(const Config &config)
                 return;
             }
 
-            const auto param_1 = utils::common::str_to_float(tokens[1]);
-            const auto param_2 = utils::common::str_to_float(tokens[2]);
+            const auto param_1 = utils::str::str_to_float(tokens[1]);
+            const auto param_2 = utils::str::str_to_float(tokens[2]);
             if (!param_1.has_value() || !param_2.has_value())
             {
                 return;

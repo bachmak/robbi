@@ -2,7 +2,7 @@
 
 #include "utils/pwm.h"
 #include "utils/geometry.h"
-#include "utils/common.h"
+#include "utils/visitor.h"
 #include "utils/io.h"
 
 #include <Servo.h>
@@ -76,16 +76,16 @@ namespace motor
 
     void Motor::set_target_speed(DegSec speed)
     {
-        std::visit(utils::common::overloads{[speed](VelocityControlState &state)
-                                            {
-                                                state.set_target_speed(speed);
-                                            },
-                                            [&](PositionControlState &state)
-                                            {
-                                                auto curr_angle = read_position(settings_);
-                                                state_ = VelocityControlState(settings_, curr_angle);
-                                                set_target_speed(speed);
-                                            }},
+        std::visit(utils::visitor::overloads{[speed](VelocityControlState &state)
+                                             {
+                                                 state.set_target_speed(speed);
+                                             },
+                                             [&](PositionControlState &state)
+                                             {
+                                                 auto curr_angle = read_position(settings_);
+                                                 state_ = VelocityControlState(settings_, curr_angle);
+                                                 set_target_speed(speed);
+                                             }},
                    state_);
     }
 

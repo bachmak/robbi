@@ -2,7 +2,7 @@
 
 #include "ros/subscription.h"
 #include "wheely.h"
-#include "utils/common.h"
+#include "utils/str.h"
 #include "utils/io.h"
 
 class WheelyConfigurator
@@ -27,14 +27,14 @@ private:
             static_cast<int>(str.size()),
             str.data());
 
-        const auto tokens = utils::common::split(str);
+        const auto tokens = utils::str::split(str);
         if (tokens.size() != 2)
         {
             return;
         }
 
         const auto setting = tokens[0];
-        const auto value = utils::common::str_to_float(tokens[1]);
+        const auto value = utils::str::str_to_float(tokens[1]);
         if (!value.has_value())
         {
             return;

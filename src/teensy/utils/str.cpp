@@ -1,8 +1,8 @@
-#include "utils/common.h"
+#include "utils/str.h"
 
 #include <algorithm>
 
-namespace utils::common
+namespace utils::str
 {
     std::string_view trim(const std::string_view &str)
     {
@@ -102,11 +102,6 @@ namespace utils::common
         }
 
         return default_value;
-    }
-
-    float ema(float new_value, float prev_value, float alpha)
-    {
-        return alpha * new_value + (1.0f - alpha) * prev_value;
     }
 
     std::optional<std::string_view> substr_after(

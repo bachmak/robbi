@@ -1,6 +1,6 @@
 #include "wheely.h"
 
-#include "utils/common.h"
+#include "utils/str.h"
 #include "utils/io.h"
 #include "utils/time.h"
 
@@ -130,7 +130,7 @@ void Wheely::set_stop(bool value)
 
 void Wheely::configure(std::string_view setting, float value)
 {
-    using utils::common::substr_after;
+    using utils::str::substr_after;
 
     auto configure_wheel = [&](WheelSettings &settings, motor::Motor &motor, std::string_view subsetting)
     {
@@ -144,11 +144,11 @@ void Wheely::configure(std::string_view setting, float value)
         }
     };
 
-    if (auto subsetting = utils::common::substr_after(setting, "left."))
+    if (auto subsetting = utils::str::substr_after(setting, "left."))
     {
         configure_wheel(settings_.left, left_, *subsetting);
     }
-    else if (auto subsetting = utils::common::substr_after(setting, "right."))
+    else if (auto subsetting = utils::str::substr_after(setting, "right."))
     {
         configure_wheel(settings_.right, right_, *subsetting);
     }
