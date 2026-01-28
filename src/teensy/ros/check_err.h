@@ -6,7 +6,7 @@
 
 namespace ros
 {
-    inline void rcc_check(rcl_ret_t ret, const char *file, int line)
+    inline void check_err(rcl_ret_t ret, const char *file, int line)
     {
         if (ret != RCL_RET_OK)
         {
@@ -17,9 +17,9 @@ namespace ros
         }
     }
 
-#define RCC_CHECK(expr)                      \
-    do                                       \
-    {                                        \
-        rcc_check(expr, __FILE__, __LINE__); \
+#define ROS_CHECK_ERR(expr)                         \
+    do                                              \
+    {                                               \
+        ::ros::check_err(expr, __FILE__, __LINE__); \
     } while (0)
 }

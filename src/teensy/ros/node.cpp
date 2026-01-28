@@ -1,7 +1,7 @@
 #include "ros/node.h"
 
 #include "ros/support.h"
-#include "utils/rcl.h"
+#include "ros/check_err.h"
 
 #include <rclc/publisher.h>
 #include <rclc/subscription.h>
@@ -17,7 +17,7 @@ namespace ros
                     const char *topic_name,
                     const rosidl_message_type_support_t *type_support)
     {
-        RCC_CHECK(rclc_publisher_init_default(
+        ROS_CHECK_ERR(rclc_publisher_init_default(
             &publisher,
             &impl_,
             type_support,
@@ -28,7 +28,7 @@ namespace ros
                     const char *topic_name,
                     const rosidl_message_type_support_t *type_support)
     {
-        RCC_CHECK(rclc_subscription_init_default(
+        ROS_CHECK_ERR(rclc_subscription_init_default(
             &subscription,
             &impl_,
             type_support,
@@ -37,11 +37,11 @@ namespace ros
 
     void Node::finalize(rcl_publisher_t &publisher)
     {
-        RCC_CHECK(rcl_publisher_fini(&publisher, &impl_));
+        ROS_CHECK_ERR(rcl_publisher_fini(&publisher, &impl_));
     }
 
     void Node::finalize(rcl_subscription_t &subscription)
     {
-        RCC_CHECK(rcl_subscription_fini(&subscription, &impl_));
+        ROS_CHECK_ERR(rcl_subscription_fini(&subscription, &impl_));
     }
 }

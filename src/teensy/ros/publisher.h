@@ -3,7 +3,7 @@
 #include "ros/node.h"
 #include "ros/message_traits.h"
 #include "utils/non_copyable.h"
-#include "utils/rcl.h"
+#include "ros/check_err.h"
 
 namespace ros
 {
@@ -28,7 +28,7 @@ namespace ros
         void publish(const T &data)
         {
             auto message = Traits::to_message(data);
-            RCC_CHECK(rcl_publish(&impl_, &message, nullptr));
+            ROS_CHECK_ERR(rcl_publish(&impl_, &message, nullptr));
         }
 
     private:

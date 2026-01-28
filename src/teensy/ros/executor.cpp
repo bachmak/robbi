@@ -4,7 +4,7 @@
 #include "ros/subscription.h"
 #include "utils/visitor.h"
 #include "ros/support.h"
-#include "utils/rcl.h"
+#include "ros/check_err.h"
 
 namespace ros
 {
@@ -21,7 +21,7 @@ namespace ros
                 overloads{
                     [this](Timer *timer)
                     {
-                        RCC_CHECK(rclc_executor_add_timer(&impl_, &timer->impl()));
+                        ROS_CHECK_ERR(rclc_executor_add_timer(&impl_, &timer->impl()));
                     },
                     [this](SubscriptionBase *subscription)
                     {
@@ -33,7 +33,7 @@ namespace ros
 
                         auto context = static_cast<void *>(subscription);
 
-                        RCC_CHECK(rclc_executor_add_subscription_with_context(
+                        ROS_CHECK_ERR(rclc_executor_add_subscription_with_context(
                             &impl_,
                             &subscription->impl(),
                             subscription->msg(),
@@ -51,11 +51,11 @@ namespace ros
         {
             std::visit(overloads{[this](Timer *timer)
                                  {
-                                     RCC_CHECK(rclc_executor_remove_timer(&impl_, &timer->impl()));
+                                     ROS_CHECK_ERR(rclc_executor_remove_timer(&impl_, &timer->impl()));
                                  },
                                  [this](SubscriptionBase *subscription)
                                  {
-                                     RCC_CHECK(rclc_executor_remove_subscription(&impl_, &subscription->impl()));
+                                     ROS_CHECK_ERR(rclc_executor_remove_subscription(&impl_, &subscription->impl()));
                                  }},
                        executable);
         }
@@ -65,6 +65,6 @@ namespace ros
 
     void Executor::spin_some(Ns timeout)
     {
-        RCC_CHECK(rclc_executor_spin_some(&impl_, timeout.count()));
+        ROS_CHECK_ERR(rclc_executor_spin_some(&impl_, timeout.count()));
     }
 }

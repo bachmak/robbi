@@ -1,6 +1,6 @@
 #include "ros/support.h"
 
-#include "utils/rcl.h"
+#include "ros/check_err.h"
 
 #include <rclc/init.h>
 #include <rclc/node.h>
@@ -11,24 +11,24 @@ namespace ros
 {
     Support::Support() : allocator_(rcl_get_default_allocator())
     {
-        RCC_CHECK(rclc_support_init(&impl_, 0, nullptr, &allocator_));
+        ROS_CHECK_ERR(rclc_support_init(&impl_, 0, nullptr, &allocator_));
     }
 
     Support::~Support()
     {
-        RCC_CHECK(rclc_support_fini(&impl_));
+        ROS_CHECK_ERR(rclc_support_fini(&impl_));
     }
 
     void Support::init(rcl_node_t &node, const char *name)
     {
-        RCC_CHECK(rclc_node_init_default(&node, name, "", &impl_));
+        ROS_CHECK_ERR(rclc_node_init_default(&node, name, "", &impl_));
     }
 
     void Support::init(rcl_timer_t &timer,
                        int64_t timeout_ns,
                        rcl_timer_callback_t callback)
     {
-        RCC_CHECK(rclc_timer_init_default(
+        ROS_CHECK_ERR(rclc_timer_init_default(
             &timer,
             &impl_,
             timeout_ns,
@@ -37,7 +37,7 @@ namespace ros
 
     void Support::init(rclc_executor_t &executor, size_t num_handles)
     {
-        RCC_CHECK(rclc_executor_init(
+        ROS_CHECK_ERR(rclc_executor_init(
             &executor,
             &impl_.context,
             num_handles,
@@ -46,11 +46,11 @@ namespace ros
 
     void Support::finalize(rcl_timer_t &timer)
     {
-        RCC_CHECK(rcl_timer_fini(&timer));
+        ROS_CHECK_ERR(rcl_timer_fini(&timer));
     }
 
     void Support::finalize(rclc_executor_t &executor)
     {
-        RCC_CHECK(rclc_executor_fini(&executor));
+        ROS_CHECK_ERR(rclc_executor_fini(&executor));
     }
 }
