@@ -109,8 +109,8 @@ void do_loop(const Config &config) {
           return;
         }
 
-        const auto param_1 = utils::str::str_to_float(tokens[1]);
-        const auto param_2 = utils::str::str_to_float(tokens[2]);
+        const auto param_1 = utils::str::to_float(tokens[1]);
+        const auto param_2 = utils::str::to_float(tokens[2]);
         if (!param_1.has_value() || !param_2.has_value()) {
           return;
         }

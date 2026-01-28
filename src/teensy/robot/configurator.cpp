@@ -22,7 +22,7 @@ std::optional<ConfigCommand> process_command(Configurator &configurator, std::st
   }
 
   const auto setting = tokens[0];
-  const auto value = utils::str::str_to_float(tokens[1]);
+  const auto value = utils::str::to_float(tokens[1]);
   if (!value.has_value()) {
     return {};
   }

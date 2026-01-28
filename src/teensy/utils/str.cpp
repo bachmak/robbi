@@ -43,7 +43,7 @@ std::vector<std::string_view> split(std::string_view s) {
   return result;
 }
 
-std::optional<float> str_to_float(std::string_view str) {
+std::optional<float> to_float(std::string_view str) {
   char *end = nullptr;
 
   auto result = strtof(str.data(), &end);
@@ -54,11 +54,11 @@ std::optional<float> str_to_float(std::string_view str) {
   return result;
 }
 
-float str_to_float(std::string_view str, float default_value) {
-  return str_to_float(str).value_or(default_value);
+float to_float(std::string_view str, float default_value) {
+  return to_float(str).value_or(default_value);
 }
 
-std::optional<bool> str_to_bool(std::string_view str) {
+std::optional<bool> to_bool(std::string_view str) {
   if (str == "true" || str == "1") {
     return true;
   }
@@ -70,13 +70,13 @@ std::optional<bool> str_to_bool(std::string_view str) {
   return std::nullopt;
 }
 
-bool str_to_bool(std::string_view str, bool default_value) {
-  return str_to_bool(str).value_or(default_value);
+bool to_bool(std::string_view str, bool default_value) {
+  return to_bool(str).value_or(default_value);
 }
 
-float str_to_float(const std::optional<std::string_view> &str, float default_value) {
+float to_float(const std::optional<std::string_view> &str, float default_value) {
   if (str.has_value()) {
-    auto result = str_to_float(*str);
+    auto result = to_float(*str);
     if (result.has_value()) {
       return *result;
     }
@@ -91,20 +91,5 @@ std::optional<std::string_view> substr_after(std::string_view sv, std::string_vi
   }
 
   return std::nullopt;
-}
-
-std::string dump_bytes_to_string(std::string_view s) {
-  std::string out;
-  out.reserve(s.size() * 3);
-
-  static const char hex[] = "0123456789ABCDEF";
-
-  for (unsigned char c : s) {
-    out.push_back(hex[(c >> 4) & 0xF]);
-    out.push_back(hex[c & 0xF]);
-    out.push_back(' ');
-  }
-
-  return out;
 }
 } // namespace utils::str
