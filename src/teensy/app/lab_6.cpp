@@ -236,3 +236,10 @@ namespace lab_6
         }
     }
 }
+
+void setup() {}
+
+void loop()
+{
+    lab_6::run();
+}
