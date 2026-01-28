@@ -2,60 +2,57 @@
 
 #include <cmath>
 
-namespace utils::strong_type
-{
-    template <typename T, typename Tag>
-    struct StrongType
-    {
-        template <typename U>
-        constexpr explicit StrongType(U v) : v(static_cast<T>(v)) {}
-        T v;
+namespace utils::strong_type {
 
-        using Self = StrongType<T, Tag>;
+template <typename T, typename Tag> struct StrongType {
+  template <typename U> constexpr explicit StrongType(U v) : v(static_cast<T>(v)) {}
+  T v;
 
-        friend Self operator+(Self a, Self b) { return Self{a.v + b.v}; }
-        friend Self operator-(Self a, Self b) { return Self{a.v - b.v}; }
-        friend Self operator*(Self a, Self b) { return Self{a.v * b.v}; }
-        friend Self operator/(Self a, Self b) { return Self{a.v / b.v}; }
-        friend Self operator%(Self a, Self b) { return Self{a.v % b.v}; }
-        friend Self operator-(Self a) { return Self{-a.v}; }
+  using Self = StrongType<T, Tag>;
 
-        friend Self operator+(Self a, T b) { return Self{a.v + b}; }
-        friend Self operator-(Self a, T b) { return Self{a.v - b}; }
-        friend Self operator*(Self a, T b) { return Self{a.v * b}; }
-        friend Self operator/(Self a, T b) { return Self{a.v / b}; }
-        friend Self operator%(Self a, T b) { return Self{a.v % b}; }
+  friend Self operator+(Self a, Self b) { return Self{a.v + b.v}; }
+  friend Self operator-(Self a, Self b) { return Self{a.v - b.v}; }
+  friend Self operator*(Self a, Self b) { return Self{a.v * b.v}; }
+  friend Self operator/(Self a, Self b) { return Self{a.v / b.v}; }
+  friend Self operator%(Self a, Self b) { return Self{a.v % b.v}; }
+  friend Self operator-(Self a) { return Self{-a.v}; }
 
-        friend Self operator+(T a, Self b) { return Self{a + b.v}; }
-        friend Self operator-(T a, Self b) { return Self{a - b.v}; }
-        friend Self operator*(T a, Self b) { return Self{a * b.v}; }
-        friend Self operator/(T a, Self b) { return Self{a / b.v}; }
-        friend Self operator%(T a, Self b) { return Self{a % b.v}; }
+  friend Self operator+(Self a, T b) { return Self{a.v + b}; }
+  friend Self operator-(Self a, T b) { return Self{a.v - b}; }
+  friend Self operator*(Self a, T b) { return Self{a.v * b}; }
+  friend Self operator/(Self a, T b) { return Self{a.v / b}; }
+  friend Self operator%(Self a, T b) { return Self{a.v % b}; }
 
-        friend bool operator<(Self a, Self b) { return a.v < b.v; }
-        friend bool operator>(Self a, Self b) { return a.v > b.v; }
-        friend bool operator==(Self a, Self b) { return a.v == b.v; }
-        friend bool operator<=(Self a, Self b) { return a.v <= b.v; }
-        friend bool operator>=(Self a, Self b) { return a.v >= b.v; }
+  friend Self operator+(T a, Self b) { return Self{a + b.v}; }
+  friend Self operator-(T a, Self b) { return Self{a - b.v}; }
+  friend Self operator*(T a, Self b) { return Self{a * b.v}; }
+  friend Self operator/(T a, Self b) { return Self{a / b.v}; }
+  friend Self operator%(T a, Self b) { return Self{a % b.v}; }
 
-        friend bool operator<(Self a, T b) { return a.v < b; }
-        friend bool operator>(Self a, T b) { return a.v > b; }
-        friend bool operator==(Self a, T b) { return a.v == b; }
-        friend bool operator<=(Self a, T b) { return a.v <= b; }
-        friend bool operator>=(Self a, T b) { return a.v >= b; }
+  friend bool operator<(Self a, Self b) { return a.v < b.v; }
+  friend bool operator>(Self a, Self b) { return a.v > b.v; }
+  friend bool operator==(Self a, Self b) { return a.v == b.v; }
+  friend bool operator<=(Self a, Self b) { return a.v <= b.v; }
+  friend bool operator>=(Self a, Self b) { return a.v >= b.v; }
 
-        Self &operator+=(Self b) { return (v += b.v, *this); }
-        Self &operator-=(Self b) { return (v -= b.v, *this); }
-        Self &operator*=(Self b) { return (v *= b.v, *this); }
-        Self &operator/=(Self b) { return (v /= b.v, *this); }
-        Self &operator%=(Self b) { return (v %= b.v, *this); }
+  friend bool operator<(Self a, T b) { return a.v < b; }
+  friend bool operator>(Self a, T b) { return a.v > b; }
+  friend bool operator==(Self a, T b) { return a.v == b; }
+  friend bool operator<=(Self a, T b) { return a.v <= b; }
+  friend bool operator>=(Self a, T b) { return a.v >= b; }
 
-        Self &operator+=(T b) { return (v += b, *this); }
-        Self &operator-=(T b) { return (v -= b, *this); }
-        Self &operator*=(T b) { return (v *= b, *this); }
-        Self &operator/=(T b) { return (v /= b, *this); }
-        Self &operator%=(T b) { return (v %= b, *this); }
+  Self &operator+=(Self b) { return (v += b.v, *this); }
+  Self &operator-=(Self b) { return (v -= b.v, *this); }
+  Self &operator*=(Self b) { return (v *= b.v, *this); }
+  Self &operator/=(Self b) { return (v /= b.v, *this); }
+  Self &operator%=(Self b) { return (v %= b.v, *this); }
 
-        friend Self abs(Self a) { return Self{std::abs(a.v)}; }
-    };
-}
+  Self &operator+=(T b) { return (v += b, *this); }
+  Self &operator-=(T b) { return (v -= b, *this); }
+  Self &operator*=(T b) { return (v *= b, *this); }
+  Self &operator/=(T b) { return (v /= b, *this); }
+  Self &operator%=(T b) { return (v %= b, *this); }
+
+  friend Self abs(Self a) { return Self{std::abs(a.v)}; }
+};
+} // namespace utils::strong_type

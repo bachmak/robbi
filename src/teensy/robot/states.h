@@ -4,49 +4,44 @@
 #include "utils/control.h"
 #include "utils/math.h"
 
-namespace robot::states
-{
-    class VelocityControl
-    {
-    public:
-        explicit VelocityControl(const MotorSettings &settings, Degree curr_angle);
+namespace robot::states {
 
-        Pwm update(Us dt, Degree position);
+class VelocityControl {
+public:
+  explicit VelocityControl(const MotorSettings &settings, Degree curr_angle);
 
-        void set_target_speed(DegSec speed);
-        void set_settings(const MotorSettings &settings);
+  Pwm update(Us dt, Degree position);
 
-    private:
-        MotorSettings settings_;
-        utils::control::Ramp ramp_;
-        utils::math::Ema speed_filter_;
-        DegSec target_speed_{0};
-        Degree last_angle_;
-    };
+  void set_target_speed(DegSec speed);
+  void set_settings(const MotorSettings &settings);
 
-    class PositionControl
-    {
-    public:
-        explicit PositionControl(
-            const MotorSettings &settings,
-            Degree start_angle,
-            Degree target_distance,
-            Us duration);
+private:
+  MotorSettings settings_;
+  utils::control::Ramp ramp_;
+  utils::math::Ema speed_filter_;
+  DegSec target_speed_{0};
+  Degree last_angle_;
+};
 
-        Pwm update(Us dt, Degree position);
+class PositionControl {
+public:
+  explicit PositionControl(const MotorSettings &settings, Degree start_angle,
+                           Degree target_distance, Us duration);
 
-        void set_settings(const MotorSettings &settings);
+  Pwm update(Us dt, Degree position);
 
-    private:
-        Pwm calc_pwm() const;
+  void set_settings(const MotorSettings &settings);
 
-    private:
-        MotorSettings settings_;
-        Degree start_angle_;
-        Degree target_distance_;
-        DegSec target_speed_;
+private:
+  Pwm calc_pwm() const;
 
-        Degree full_angle_;
-        Us elapsed_time_{0};
-    };
-}
+private:
+  MotorSettings settings_;
+  Degree start_angle_;
+  Degree target_distance_;
+  DegSec target_speed_;
+
+  Degree full_angle_;
+  Us elapsed_time_{0};
+};
+} // namespace robot::states

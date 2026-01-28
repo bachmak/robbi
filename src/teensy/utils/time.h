@@ -2,76 +2,58 @@
 
 #include <Arduino.h>
 
-namespace utils::time
-{
-    class StopWatch
-    {
-    public:
-        explicit StopWatch(Ms start = Ms{millis()}) : start(start) {}
+namespace utils::time {
 
-        Ms time_passed(Ms curr = Ms{millis()}) const
-        {
-            return curr - start;
-        }
+class StopWatch {
+public:
+  explicit StopWatch(Ms start = Ms{millis()}) : start(start) {}
 
-        void reset(Ms curr = Ms{millis()})
-        {
-            start = curr;
-        }
+  Ms time_passed(Ms curr = Ms{millis()}) const { return curr - start; }
 
-    private:
-        Ms start;
-    };
+  void reset(Ms curr = Ms{millis()}) { start = curr; }
 
-    class Timer
-    {
-    public:
-        explicit Timer(Ms duration, Ms start = Ms{millis()}) : duration(duration), stop_watch(start) {}
+private:
+  Ms start;
+};
 
-        bool is_over(Ms curr = Ms{millis()}) const
-        {
-            return stop_watch.time_passed(curr) > duration;
-        }
+class Timer {
+public:
+  explicit Timer(Ms duration, Ms start = Ms{millis()}) : duration(duration), stop_watch(start) {}
 
-        void reset(Ms curr = Ms{millis()})
-        {
-            stop_watch.reset(curr);
-        }
+  bool is_over(Ms curr = Ms{millis()}) const { return stop_watch.time_passed(curr) > duration; }
 
-    private:
-        Ms duration;
-        StopWatch stop_watch;
-    };
+  void reset(Ms curr = Ms{millis()}) { stop_watch.reset(curr); }
 
-    class LoopStopWatch
-    {
-    public:
-        Ms tick(Ms curr = Ms{millis()})
-        {
-            auto loop = curr - last;
-            common += loop;
-            iterations++;
-            last = curr;
-            return loop;
-        }
+private:
+  Ms duration;
+  StopWatch stop_watch;
+};
 
-        Ms average() const
-        {
-            return Ms{static_cast<int>(static_cast<double>(common.count()) / iterations)};
-        }
+class LoopStopWatch {
+public:
+  Ms tick(Ms curr = Ms{millis()}) {
+    auto loop = curr - last;
+    common += loop;
+    iterations++;
+    last = curr;
+    return loop;
+  }
 
-    private:
-        Ms last = Ms{millis()};
-        Ms common = Ms{0};
-        int iterations = 0;
-    };
+  Ms average() const {
+    return Ms{static_cast<int>(static_cast<double>(common.count()) / iterations)};
+  }
 
-    inline float to_sec(Us t)
-    {
-        using R = std::ratio_divide<Us::period, Sec::period>;
-        constexpr auto num = R::num;
-        constexpr auto den = R::den;
+private:
+  Ms last = Ms{millis()};
+  Ms common = Ms{0};
+  int iterations = 0;
+};
 
-        return static_cast<float>(t.count()) * num / den;
-    }
+inline float to_sec(Us t) {
+  using R = std::ratio_divide<Us::period, Sec::period>;
+  constexpr auto num = R::num;
+  constexpr auto den = R::den;
+
+  return static_cast<float>(t.count()) * num / den;
 }
+} // namespace utils::time

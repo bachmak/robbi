@@ -2,37 +2,34 @@
 
 #include "types.h"
 
-namespace utils::pid
-{
-    struct PIDSettings
-    {
-        float G;
-        float T_i;
-        float T_d;
-        float out_min;
-        float out_max;
-    };
+namespace utils::pid {
 
-    struct PIDParams
-    {
-        float K_p;
-        float K_i;
-        float K_d;
-    };
+struct PIDSettings {
+  float G;
+  float T_i;
+  float T_d;
+  float out_min;
+  float out_max;
+};
 
-    class PID
-    {
-    public:
-        explicit PID(const PIDSettings &settings);
+struct PIDParams {
+  float K_p;
+  float K_i;
+  float K_d;
+};
 
-    public:
-        float update(float setpoint, float measurement, float dt);
+class PID {
+public:
+  explicit PID(const PIDSettings &settings);
 
-    private:
-        PIDSettings settings_;
-        PIDParams params_;
-        float integrator_;
-        float prev_error_;
-        bool first_run_ = true;
-    };
-}
+public:
+  float update(float setpoint, float measurement, float dt);
+
+private:
+  PIDSettings settings_;
+  PIDParams params_;
+  float integrator_;
+  float prev_error_;
+  bool first_run_ = true;
+};
+} // namespace utils::pid

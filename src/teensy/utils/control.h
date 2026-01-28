@@ -4,58 +4,54 @@
 
 #include <string_view>
 
-namespace utils::control
-{
-    struct PIDSettings
-    {
-        float G;
-        float T_i;
-        float T_d;
-        float out_min;
-        float out_max;
-        float deadband;
-    };
+namespace utils::control {
 
-    struct PIDParams
-    {
-        float K_p;
-        float K_i;
-        float K_d;
-    };
+struct PIDSettings {
+  float G;
+  float T_i;
+  float T_d;
+  float out_min;
+  float out_max;
+  float deadband;
+};
 
-    class PID
-    {
-    public:
-        explicit PID(const PIDSettings &settings);
+struct PIDParams {
+  float K_p;
+  float K_i;
+  float K_d;
+};
 
-    public:
-        float update(float setpoint, float measurement, float dt);
+class PID {
+public:
+  explicit PID(const PIDSettings &settings);
 
-        void configure(std::string_view setting, float value);
+public:
+  float update(float setpoint, float measurement, float dt);
 
-    private:
-        PIDSettings settings_;
-        PIDParams params_;
-        float integrator_;
-        float prev_error_;
-        bool first_run_ = true;
-        bool log_ = true;
-    };
+  void configure(std::string_view setting, float value);
 
-    class Ramp
-    {
-    public:
-        Ramp(float rise_rate, float fall_rate);
-        float update(float target, float dt);
+private:
+  PIDSettings settings_;
+  PIDParams params_;
+  float integrator_;
+  float prev_error_;
+  bool first_run_ = true;
+  bool log_ = true;
+};
 
-        void reset(float v);
-        float value() const;
+class Ramp {
+public:
+  Ramp(float rise_rate, float fall_rate);
+  float update(float target, float dt);
 
-        void configure(std::string_view setting, float value);
+  void reset(float v);
+  float value() const;
 
-    private:
-        float rise_rate_; // units per second
-        float fall_rate_; // units per second
-        float value_ = 0.0f;
-    };
-}
+  void configure(std::string_view setting, float value);
+
+private:
+  float rise_rate_; // units per second
+  float fall_rate_; // units per second
+  float value_ = 0.0f;
+};
+} // namespace utils::control

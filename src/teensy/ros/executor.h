@@ -1,34 +1,33 @@
 #pragma once
 
-#include "utils/non_copyable.h"
 #include "ros/timer.h"
+#include "utils/non_copyable.h"
 
 #include <rclc/executor.h>
 
 #include <variant>
 #include <vector>
 
-namespace ros
-{
-    class Support;
-    class Timer;
-    class SubscriptionBase;
+namespace ros {
 
-    using Executable = std::variant<Timer *, SubscriptionBase *>;
+class Support;
+class Timer;
+class SubscriptionBase;
 
-    class Executor
-    {
-    public:
-        NON_COPYABLE(Executor)
+using Executable = std::variant<Timer *, SubscriptionBase *>;
 
-        Executor(Support &support, std::vector<Executable> executables);
-        ~Executor();
+class Executor {
+public:
+  NON_COPYABLE(Executor)
 
-        void spin_some(Ns timeout);
+  Executor(Support &support, std::vector<Executable> executables);
+  ~Executor();
 
-    private:
-        rclc_executor_t impl_;
-        Support &support_;
-        std::vector<Executable> executables_;
-    };
-}
+  void spin_some(Ns timeout);
+
+private:
+  rclc_executor_t impl_;
+  Support &support_;
+  std::vector<Executable> executables_;
+};
+} // namespace ros

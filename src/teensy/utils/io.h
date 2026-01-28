@@ -7,65 +7,57 @@
 #include <optional>
 #include <string>
 
-namespace ros
-{
-    template <typename T>
-    class Publisher;
+namespace ros {
+template <typename T> class Publisher;
 }
 
-namespace utils::io
-{
-    enum class LogLevel
-    {
-        OFF,
-        ERROR,
-        WARNING,
-        INFO,
-        DEBUG,
-    };
+namespace utils::io {
 
-    enum class SerialRedirect
-    {
-        DEFAULT,
-        MICRO_ROS,
-    };
+enum class LogLevel {
+  OFF,
+  ERROR,
+  WARNING,
+  INFO,
+  DEBUG,
+};
 
-    struct Settings
-    {
-        int serial_baud = 9600;
-        LogLevel log_level = LogLevel::INFO;
-        SerialRedirect serial_redirect = SerialRedirect::DEFAULT;
-        Ms delay_after_init{0};
-    };
+enum class SerialRedirect {
+  DEFAULT,
+  MICRO_ROS,
+};
 
-    void init(const Settings &settings);
+struct Settings {
+  int serial_baud = 9600;
+  LogLevel log_level = LogLevel::INFO;
+  SerialRedirect serial_redirect = SerialRedirect::DEFAULT;
+  Ms delay_after_init{0};
+};
 
-    void redirect_to(ros::Publisher<std::string_view> &publisher);
-    void redirect_reset();
+void init(const Settings &settings);
 
-    std::string get_string();
-    std::optional<std::string> try_get_string();
+void redirect_to(ros::Publisher<std::string_view> &publisher);
+void redirect_reset();
 
-    void debug(const char *format, ...);
-    void info(const char *format, ...);
-    void warning(const char *format, ...);
-    void error(const char *format, ...);
+std::string get_string();
+std::optional<std::string> try_get_string();
 
-    class StringPrint : public Print
-    {
-    public:
-        std::string buffer;
+void debug(const char *format, ...);
+void info(const char *format, ...);
+void warning(const char *format, ...);
+void error(const char *format, ...);
 
-        size_t write(uint8_t b) override
-        {
-            buffer.push_back(static_cast<char>(b));
-            return 1;
-        }
+class StringPrint : public Print {
+public:
+  std::string buffer;
 
-        size_t write(const uint8_t *data, size_t len) override
-        {
-            buffer.append((const char *)data, len);
-            return len;
-        }
-    };
-}
+  size_t write(uint8_t b) override {
+    buffer.push_back(static_cast<char>(b));
+    return 1;
+  }
+
+  size_t write(const uint8_t *data, size_t len) override {
+    buffer.append((const char *)data, len);
+    return len;
+  }
+};
+} // namespace utils::io

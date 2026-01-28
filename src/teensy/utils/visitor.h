@@ -1,13 +1,8 @@
 #pragma once
 
-namespace utils::visitor
-{
-    template <class... Ts>
-    struct overloads : Ts...
-    {
-        using Ts::operator()...;
-    };
+namespace utils::visitor {
 
-    template <class... Ts>
-    overloads(Ts...) -> overloads<Ts...>;
-}
+template <class... Ts> struct overloads : Ts... { using Ts::operator()...; };
+
+template <class... Ts> overloads(Ts...) -> overloads<Ts...>;
+} // namespace utils::visitor

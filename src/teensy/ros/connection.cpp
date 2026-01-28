@@ -4,40 +4,34 @@
 
 #include "rmw_microros/ping.h"
 
-namespace ros
-{
-    enum class State
-    {
-        WAITING,
-        CONNECTED,
-        DISCONNECTED,
-    };
+namespace ros {
 
-    State check_connection(utils::time::Timer &timer, Ms ping_timeout)
-    {
-        if (timer.is_over())
-        {
-            timer.reset();
+enum class State {
+  WAITING,
+  CONNECTED,
+  DISCONNECTED,
+};
 
-            auto res = rmw_uros_ping_agent(ping_timeout.count(), 1);
-            if (res == RMW_RET_OK)
-            {
-                return State::CONNECTED;
-            }
+State check_connection(utils::time::Timer &timer, Ms ping_timeout) {
+  if (timer.is_over()) {
+    timer.reset();
 
-            return State::DISCONNECTED;
-        }
-
-        return State::WAITING;
+    auto res = rmw_uros_ping_agent(ping_timeout.count(), 1);
+    if (res == RMW_RET_OK) {
+      return State::CONNECTED;
     }
 
-    bool is_connected(utils::time::Timer &timer, Ms ping_timeout)
-    {
-        return check_connection(timer, ping_timeout) == State::CONNECTED;
-    }
+    return State::DISCONNECTED;
+  }
 
-    bool is_disconnected(utils::time::Timer &timer, Ms ping_timeout)
-    {
-        return check_connection(timer, ping_timeout) == State::DISCONNECTED;
-    }
+  return State::WAITING;
 }
+
+bool is_connected(utils::time::Timer &timer, Ms ping_timeout) {
+  return check_connection(timer, ping_timeout) == State::CONNECTED;
+}
+
+bool is_disconnected(utils::time::Timer &timer, Ms ping_timeout) {
+  return check_connection(timer, ping_timeout) == State::DISCONNECTED;
+}
+} // namespace ros

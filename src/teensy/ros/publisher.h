@@ -1,38 +1,31 @@
 #pragma once
 
-#include "ros/node.h"
-#include "ros/message_traits.h"
-#include "utils/non_copyable.h"
 #include "ros/check_err.h"
+#include "ros/message_traits.h"
+#include "ros/node.h"
+#include "utils/non_copyable.h"
 
-namespace ros
-{
-    template <typename T>
-    class Publisher
-    {
-    public:
-        NON_COPYABLE(Publisher)
+namespace ros {
 
-        Publisher(Node &node, const char *topic_name) : impl_(), node_(node)
-        {
-            node_.init(impl_, topic_name, Traits::get_type_support());
-        }
+template <typename T> class Publisher {
+public:
+  NON_COPYABLE(Publisher)
 
-        ~Publisher()
-        {
-            node_.finalize(impl_);
-        }
+  Publisher(Node &node, const char *topic_name) : impl_(), node_(node) {
+    node_.init(impl_, topic_name, Traits::get_type_support());
+  }
 
-        using Traits = MessageTraits<T>;
+  ~Publisher() { node_.finalize(impl_); }
 
-        void publish(const T &data)
-        {
-            auto message = Traits::to_message(data);
-            ROS_CHECK_ERR(rcl_publish(&impl_, &message, nullptr));
-        }
+  using Traits = MessageTraits<T>;
 
-    private:
-        rcl_publisher_t impl_;
-        Node &node_;
-    };
-}
+  void publish(const T &data) {
+    auto message = Traits::to_message(data);
+    ROS_CHECK_ERR(rcl_publish(&impl_, &message, nullptr));
+  }
+
+private:
+  rcl_publisher_t impl_;
+  Node &node_;
+};
+} // namespace ros

@@ -4,45 +4,32 @@
 
 #include <rclc/timer.h>
 
-namespace ros
-{
-    static auto timers = std::vector<Timer *>{};
+namespace ros {
 
-    Timer::Timer(Support &support, Ns period, Callback callback)
-        : callback_{callback}, impl_{}, support_{support}
-    {
-        timers.push_back(this);
+static auto timers = std::vector<Timer *>{};
 
-        auto rcl_callback =
-            [](rcl_timer_t *timer, int64_t last_call_time)
-        {
-            auto it = std::find_if(
-                timers.begin(),
-                timers.end(),
-                [timer](Timer *t)
-                { return &t->impl_ == timer; });
+Timer::Timer(Support &support, Ns period, Callback callback)
+    : callback_{callback}, impl_{}, support_{support} {
+  timers.push_back(this);
 
-            if (it == timers.end())
-            {
-                return;
-            }
+  auto rcl_callback = [](rcl_timer_t *timer, int64_t last_call_time) {
+    auto it = std::find_if(timers.begin(), timers.end(),
+                           [timer](Timer *t) { return &t->impl_ == timer; });
 
-            auto &self = **it;
-            self.callback_(last_call_time);
-        };
-
-        support.init(impl_, period.count(), rcl_callback);
+    if (it == timers.end()) {
+      return;
     }
 
-    Timer::~Timer()
-    {
-        support_.finalize(impl_);
+    auto &self = **it;
+    self.callback_(last_call_time);
+  };
 
-        timers.erase(
-            std::remove(
-                timers.begin(),
-                timers.end(),
-                this),
-            timers.end());
-    }
+  support.init(impl_, period.count(), rcl_callback);
 }
+
+Timer::~Timer() {
+  support_.finalize(impl_);
+
+  timers.erase(std::remove(timers.begin(), timers.end(), this), timers.end());
+}
+} // namespace ros

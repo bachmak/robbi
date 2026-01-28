@@ -1,32 +1,31 @@
 #pragma once
 
+#include "ros/executor.h"
 #include "types.h"
 #include "utils/non_copyable.h"
-#include "ros/executor.h"
 
 #include <rcl/timer.h>
 
 #include <functional>
 
-namespace ros
-{
-    class Support;
+namespace ros {
 
-    class Timer
-    {
-    public:
-        NON_COPYABLE(Timer)
+class Support;
 
-        using Callback = std::function<void(int64_t)>;
+class Timer {
+public:
+  NON_COPYABLE(Timer)
 
-        Timer(Support &support, Ns period, Callback callback);
-        ~Timer();
+  using Callback = std::function<void(int64_t)>;
 
-        rcl_timer_t &impl() { return impl_; }
+  Timer(Support &support, Ns period, Callback callback);
+  ~Timer();
 
-    private:
-        std::function<void(int64_t)> callback_;
-        rcl_timer_t impl_;
-        Support &support_;
-    };
-}
+  rcl_timer_t &impl() { return impl_; }
+
+private:
+  std::function<void(int64_t)> callback_;
+  rcl_timer_t impl_;
+  Support &support_;
+};
+} // namespace ros

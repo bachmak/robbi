@@ -7,71 +7,55 @@
 
 #include <functional>
 
-namespace ros
-{
-    class Node;
+namespace ros {
 
-    class SubscriptionBase
-    {
-    public:
-        NON_COPYABLE(SubscriptionBase)
-        using Callback = std::function<void(const void *)>;
+class Node;
 
-        SubscriptionBase(Node &node,
-                         const char *topic_name,
-                         void *message,
-                         const rosidl_message_type_support_t *type_support,
-                         Callback callback);
-        ~SubscriptionBase();
+class SubscriptionBase {
+public:
+  NON_COPYABLE(SubscriptionBase)
+  using Callback = std::function<void(const void *)>;
 
-        rcl_subscription_t &impl() { return impl_; }
-        void *msg() { return message_; }
-        void on_message(const void *message);
+  SubscriptionBase(Node &node, const char *topic_name, void *message,
+                   const rosidl_message_type_support_t *type_support, Callback callback);
+  ~SubscriptionBase();
 
-    private:
-        rcl_subscription_t impl_;
-        Node &node_;
-        void *message_;
-        Callback callback_;
-    };
+  rcl_subscription_t &impl() { return impl_; }
+  void *msg() { return message_; }
+  void on_message(const void *message);
 
-    template <typename T>
-    class Subscription
-    {
-    public:
-        using Traits = MessageTraits<T>;
-        using RclMessageType = typename Traits::RclMessageType;
-        using Callback = std::function<void(T)>;
+private:
+  rcl_subscription_t impl_;
+  Node &node_;
+  void *message_;
+  Callback callback_;
+};
 
-        NON_COPYABLE(Subscription)
+template <typename T> class Subscription {
+public:
+  using Traits = MessageTraits<T>;
+  using RclMessageType = typename Traits::RclMessageType;
+  using Callback = std::function<void(T)>;
 
-        Subscription(Node &node, const char *topic_name, Callback callback)
-            : dummy_{(Traits::init(&message_), false)},
-              base_{
-                  node,
-                  topic_name,
-                  static_cast<void *>(&message_),
-                  Traits::get_type_support(),
-                  [this](const void *void_msg)
-                  {
-                      const auto *rcl_msg = static_cast<const RclMessageType *>(void_msg);
-                      callback_(Traits::to_original_type(rcl_msg));
-                  }},
-              callback_(std::move(callback))
-        {
-        }
+  NON_COPYABLE(Subscription)
 
-        ~Subscription()
-        {
-            Traits::finalize(&message_);
-        }
+  Subscription(Node &node, const char *topic_name, Callback callback)
+      : dummy_{(Traits::init(&message_), false)},
+        base_{node, topic_name, static_cast<void *>(&message_), Traits::get_type_support(),
+              [this](const void *void_msg) {
+                const auto *rcl_msg = static_cast<const RclMessageType *>(void_msg);
+                callback_(Traits::to_original_type(rcl_msg));
+              }},
+        callback_(std::move(callback)) {}
 
-        SubscriptionBase &base() { return base_; }
+  ~Subscription() { Traits::finalize(&message_); }
 
-    private:
-        RclMessageType message_;
-        bool dummy_;
-        SubscriptionBase base_;
-        Callback callback_;
-    };
-}
+  SubscriptionBase &base() { return base_; }
+
+private:
+  RclMessageType message_;
+  bool dummy_;
+  SubscriptionBase base_;
+  Callback callback_;
+};
+} // namespace ros
