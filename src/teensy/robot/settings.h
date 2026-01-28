@@ -60,5 +60,6 @@ struct RobotSettings {
 
   WheelSettings right;
   Meter width = Meter{0.102};
+  Ms delay{0};
 };
 } // namespace robot

@@ -9,6 +9,7 @@
 #include "ros/timer.h"
 #include "utils/debug.h"
 #include "utils/io.h"
+#include "utils/str.h"
 #include "utils/time.h"
 
 struct Config {
@@ -82,37 +83,7 @@ void do_loop(const Config &config) {
 
   auto robot = robot::Robot{config.robot_settings};
   auto main_loop_delay = Ms{0};
-
-  auto cfg_sub = ros::Subscription<std::string_view>{
-      node,
-      config.config_topic,
-      [&](std::string_view str) {
-        utils::io::debug("RobotConfiguration: received message: %.*s", static_cast<int>(str.size()),
-                         str.data());
-
-        const auto tokens = utils::str::split(str);
-        if (tokens.size() != 2) {
-          return;
-        }
-
-        const auto setting = tokens[0];
-        const auto value = utils::str::str_to_float(tokens[1]);
-        if (!value.has_value()) {
-          return;
-        }
-
-        if (setting == "delay") {
-          main_loop_delay = Ms{static_cast<int>(*value)};
-        } else {
-          robot.configure(setting, *value);
-        }
-
-        utils::io::info("RobotConfiguration: applying setting: %.*s = %f",
-                        static_cast<int>(setting.size()), setting.data(), *value);
-
-        robot.configure(setting, *value);
-      },
-  };
+  auto configurator = robot::Configurator{robot, node, config.config_topic};
 
   auto cmd_vel_sub = ros::Subscription<utils::geometry::Twist>{
       node, config.cmd_vel_topic, [&](const utils::geometry::Twist &twist) {
@@ -160,7 +131,7 @@ void do_loop(const Config &config) {
   auto executables = std::vector<ros::Executable>{
       &cmd_vel_sub.base(),
       &cmd_action_sub.base(),
-      &cfg_sub.base(),
+      &configurator.subscription().base(),
       &echo_sub.base(),
   };
 

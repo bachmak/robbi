@@ -56,4 +56,9 @@ inline float to_sec(Us t) {
 
   return static_cast<float>(t.count()) * num / den;
 }
+
+inline void delay(Us duration) { ::delayMicroseconds(duration.count()); }
+inline void delay(Ms duration) { ::delay(duration.count()); }
+inline void delay(Sec duration) { ::delay(static_cast<uint32_t>(duration.count() * 1000)); }
+
 } // namespace utils::time

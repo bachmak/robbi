@@ -65,6 +65,8 @@ Robot::Robot(const RobotSettings &settings)
 void Robot::update(Us dt) {
   left_.update(dt);
   right_.update(dt);
+
+  utils::time::delay(settings_.delay);
 }
 
 void Robot::set_target_speed(const utils::geometry::Twist &twist) {
@@ -125,6 +127,8 @@ void Robot::configure(std::string_view setting, float value) {
     configure_wheel(settings_.right, right_, *subsetting);
   } else if (setting == "width") {
     settings_.width = Meter{value};
+  } else if (setting == "delay") {
+    settings_.delay = Ms{static_cast<int>(value)};
   } else if (setting == "speed") {
     auto speed = DegSec{value};
     left_.set_target_speed(speed);

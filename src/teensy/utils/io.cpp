@@ -1,6 +1,7 @@
-#include "io.h"
+#include "utils/io.h"
 
 #include "ros/publisher.h"
+#include "utils/time.h"
 
 #include <Arduino.h>
 #include <micro_ros_platformio.h>
@@ -96,7 +97,7 @@ void init(const Settings &settings) {
     break;
   }
 
-  delay(settings.delay_after_init.count());
+  time::delay(settings.delay_after_init);
 }
 
 void redirect_to(ros::Publisher<std::string_view> &publisher) { s_log_publisher = &publisher; }
