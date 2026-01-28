@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ros/timer.h"
+#include "types.h"
 #include "utils/non_copyable.h"
 
 #include <rclc/executor.h>
