@@ -1,14 +1,14 @@
-#include "ros/support.h"
-#include "ros/node.h"
-#include "ros/subscription.h"
+#include "ros/connection.h"
 #include "ros/executor.h"
+#include "ros/node.h"
 #include "ros/publisher.h"
+#include "ros/subscription.h"
+#include "ros/support.h"
 #include "ros/timer.h"
 #include "utils/io.h"
 #include "utils/time.h"
 #include "wheely.h"
 #include "wheely_configurator.h"
-#include "utils/connection.h"
 
 #include <CrashReport.h>
 
@@ -64,7 +64,7 @@ void do_loop(const Config &config)
         // adjusted start point for timer to avoid waiting the first time
         -config.ping_interval,
     };
-    while (!utils::connection::is_connected(ping_timer, config.ping_timeout))
+    while (!ros::is_connected(ping_timer, config.ping_timeout))
     {
     }
 
@@ -197,7 +197,7 @@ void do_loop(const Config &config)
     bool led_switch = false;
 
     auto last = Us{micros() - 1000}; // to prevent first dt == 0
-    while (!utils::connection::is_disconnected(ping_timer, config.ping_timeout))
+    while (!ros::is_disconnected(ping_timer, config.ping_timeout))
     {
         const auto now = Us{micros()};
         const auto dt = now - std::exchange(last, now);
