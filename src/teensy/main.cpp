@@ -1,4 +1,5 @@
 #include "robot/configurator.h"
+#include "robot/controller.h"
 #include "robot/robot.h"
 #include "ros/connection.h"
 #include "ros/executor.h"
@@ -6,10 +7,8 @@
 #include "ros/publisher.h"
 #include "ros/subscription.h"
 #include "ros/support.h"
-#include "ros/timer.h"
 #include "utils/debug.h"
 #include "utils/io.h"
-#include "utils/str.h"
 #include "utils/time.h"
 
 struct Config {
@@ -45,7 +44,6 @@ struct Config {
 
   const char *cmd_vel_topic = "cmd_vel";
   const char *cmd_action_topic = "cmd_action";
-  const char *cmd_vel_echo_topic = "cmd_vel_echo";
   const char *logs_topic = "logs";
   const char *config_topic = "robot_config";
   const char *echo_sub_topic = "echo_request";
@@ -71,10 +69,6 @@ void do_loop(const Config &config) {
 
   auto support = ros::Support{};
   auto node = ros::Node{support, config.node_name};
-  auto cmd_vel_echo_publisher = ros::Publisher<utils::geometry::Twist>{
-      node,
-      config.cmd_vel_echo_topic,
-  };
 
   auto log_publisher = ros::Publisher<std::string_view>{node, config.logs_topic};
   utils::io::redirect_to(log_publisher);
@@ -82,56 +76,17 @@ void do_loop(const Config &config) {
   auto echo_publisher = ros::Publisher<std::string_view>{node, config.echo_pub_topic};
 
   auto robot = robot::Robot{config.robot_settings};
-  auto main_loop_delay = Ms{0};
   auto configurator = robot::Configurator{robot, node, config.config_topic};
-
-  auto cmd_vel_sub = ros::Subscription<utils::geometry::Twist>{
-      node, config.cmd_vel_topic, [&](const utils::geometry::Twist &twist) {
-        cmd_vel_echo_publisher.publish(twist);
-        robot.set_target_speed(twist);
-      }};
-
-  auto cmd_action_sub = ros::Subscription<std::string_view>{
-      node, config.cmd_action_topic, [&robot](std::string_view cmd) {
-        const auto tokens = utils::str::split(cmd);
-        if (tokens.size() < 0) {
-          return;
-        }
-
-        const auto action = tokens[0];
-        if (action == "stop") {
-          return robot.set_stop(true);
-        }
-        if (action == "go") {
-          return robot.set_stop(false);
-        }
-        if (tokens.size() < 2) {
-          return;
-        }
-
-        const auto param_1 = utils::str::to_float(tokens[1]);
-        const auto param_2 = utils::str::to_float(tokens[2]);
-        if (!param_1.has_value() || !param_2.has_value()) {
-          return;
-        }
-
-        const auto duration = Us{static_cast<int64_t>(*param_2 * 1'000'000)};
-        if (action == "move") {
-          return robot.set_target_distance(Meter{*param_1}, duration);
-        }
-        if (action == "rotate") {
-          return robot.set_target_rotation(Degree{*param_1}, duration);
-        }
-      }};
+  auto controller = robot::Controller{robot, node, config.cmd_vel_topic, config.cmd_action_topic};
 
   auto echo_sub = ros::Subscription<std::string_view>{
       node, config.echo_sub_topic,
       [&echo_publisher](std::string_view echo) { echo_publisher.publish(echo); }};
 
   auto executables = std::vector<ros::Executable>{
-      &cmd_vel_sub.base(),
-      &cmd_action_sub.base(),
       &configurator.subscription().base(),
+      &controller.cmd_vel_subscription().base(),
+      &controller.cmd_action_subscription().base(),
       &echo_sub.base(),
   };
 
@@ -148,8 +103,6 @@ void do_loop(const Config &config) {
 
     executor.spin_some(config.spin_timeout);
     robot.update(dt);
-
-    delay(main_loop_delay.count());
   }
 
   utils::io::redirect_reset();
