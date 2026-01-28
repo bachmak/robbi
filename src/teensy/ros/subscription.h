@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ros_oop/message_traits.h"
+#include "ros/message_traits.h"
 #include "utils/non_copyable.h"
 
 #include <rcl/subscription.h>
