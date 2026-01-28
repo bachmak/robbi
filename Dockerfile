@@ -64,7 +64,8 @@ RUN apt update && apt install -y \
     python3-venv \
     gh \
     gcc-arm-none-eabi \
-    binutils-arm-none-eabi
+    binutils-arm-none-eabi \
+    clang-format
 
 # ---- Micro-ROS setup ----
 RUN git clone -b iron https://github.com/micro-ROS/micro_ros_setup.git /opt/micro_ros_setup
