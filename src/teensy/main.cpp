@@ -7,10 +7,9 @@
 #include "ros/subscription.h"
 #include "ros/support.h"
 #include "ros/timer.h"
+#include "utils/debug.h"
 #include "utils/io.h"
 #include "utils/time.h"
-
-#include <CrashReport.h>
 
 struct Config {
   utils::io::Settings io_setings{
@@ -57,7 +56,7 @@ struct Config {
   Ms spin_timeout{100};
   Ms connection_check_period{500};
 
-  Pin main_loop_pin{13};
+  Pin debug_pin{13};
 };
 
 void do_loop(const Config &config) {
@@ -166,21 +165,15 @@ void do_loop(const Config &config) {
   };
 
   auto executor = ros::Executor{support, executables};
-
-  bool led_switch = false;
+  auto blinker = utils::debug::Blinker{config.debug_pin};
 
   auto last = Us{micros() - 1000}; // to prevent first dt == 0
   while (!ros::is_disconnected(ping_timer, config.ping_timeout)) {
     const auto now = Us{micros()};
     const auto dt = now - std::exchange(last, now);
 
-    digitalWrite(config.main_loop_pin.v, std::exchange(led_switch, !led_switch));
-
-    if (CrashReport) {
-      auto p = utils::io::StringPrint{};
-      CrashReport.printTo(p);
-      utils::io::debug("there is a crash report:\n%s", p.buffer.c_str());
-    }
+    blinker.update();
+    utils::debug::crash_report();
 
     executor.spin_some(config.spin_timeout);
     robot.update(dt);
@@ -194,7 +187,6 @@ void do_loop(const Config &config) {
 void run() {
   const auto config = Config{};
   utils::io::init(config.io_setings);
-  pinMode(config.main_loop_pin.v, OUTPUT);
 
   while (true) {
     do_loop(config);
