@@ -16,7 +16,7 @@ public:
   NON_COPYABLE(SubscriptionBase)
   using Callback = std::function<void(const void *)>;
 
-  SubscriptionBase(Node &node, const char *topic_name, void *message,
+  SubscriptionBase(Node &node, std::string_view topic_name, void *message,
                    const rosidl_message_type_support_t *type_support, Callback callback);
   ~SubscriptionBase();
 
@@ -39,7 +39,7 @@ public:
 
   NON_COPYABLE(Subscription)
 
-  Subscription(Node &node, const char *topic_name, Callback callback)
+  Subscription(Node &node, std::string_view topic_name, Callback callback)
       : dummy_{(Traits::init(&message_), false)},
         base_{node, topic_name, static_cast<void *>(&message_), Traits::get_type_support(),
               [this](const void *void_msg) {

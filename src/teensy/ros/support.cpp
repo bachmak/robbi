@@ -15,8 +15,8 @@ Support::Support() : allocator_(rcl_get_default_allocator()) {
 
 Support::~Support() { ROS_CHECK_ERR(rclc_support_fini(&impl_)); }
 
-void Support::init(rcl_node_t &node, const char *name) {
-  ROS_CHECK_ERR(rclc_node_init_default(&node, name, "", &impl_));
+void Support::init(rcl_node_t &node, std::string_view name) {
+  ROS_CHECK_ERR(rclc_node_init_default(&node, name.data(), "", &impl_));
 }
 
 void Support::init(rcl_timer_t &timer, int64_t timeout_ns, rcl_timer_callback_t callback) {

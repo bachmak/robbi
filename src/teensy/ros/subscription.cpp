@@ -4,7 +4,7 @@
 
 namespace ros {
 
-SubscriptionBase::SubscriptionBase(Node &node, const char *topic_name, void *message,
+SubscriptionBase::SubscriptionBase(Node &node, std::string_view topic_name, void *message,
                                    const rosidl_message_type_support_t *type_support,
                                    Callback callback)
     : node_(node), message_(message), callback_(std::move(callback)) {

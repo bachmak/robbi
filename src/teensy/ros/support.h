@@ -8,6 +8,8 @@
 #include <rclc/executor.h>
 #include <rclc/types.h>
 
+#include <string_view>
+
 namespace ros {
 
 class Support {
@@ -16,7 +18,7 @@ public:
   Support();
   ~Support();
 
-  void init(rcl_node_t &node, const char *name);
+  void init(rcl_node_t &node, std::string_view name);
   void init(rcl_timer_t &timer, int64_t timeout_ns, rcl_timer_callback_t callback);
   void init(rclc_executor_t &executor, size_t num_handles);
 

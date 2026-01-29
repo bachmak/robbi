@@ -11,7 +11,7 @@ template <typename T> class Publisher {
 public:
   NON_COPYABLE(Publisher)
 
-  Publisher(Node &node, const char *topic_name) : impl_(), node_(node) {
+  Publisher(Node &node, std::string_view topic_name) : impl_(), node_(node) {
     node_.init(impl_, topic_name, Traits::get_type_support());
   }
 
