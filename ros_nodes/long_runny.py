@@ -51,11 +51,10 @@ class LongRunny(Node):
 
         # Constants
         self.imu_topic = "/sensi/imu"
-        self.cmd_action_topic = "/cmd_action"
         self.control_period = 1 / 50.0
         self.fwd_vel = 0.08
-        self.cmd_vel_topic = "/cmd_vel"
-        self.cmd_action_topic = "/cmd_action"
+        self.cmd_vel_topic = "/robot/cmd_vel"
+        self.cmd_action_topic = "/robot/cmd_action"
         self.angle_alpha = 0.8
         self.localize_time = 2.0
         self.k_p_left = 0.1

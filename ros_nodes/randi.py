@@ -12,7 +12,7 @@ class Randi(Node):
 
         # Topics
         self.declare_parameter('range_topic', '/range')
-        self.declare_parameter('cmd_vel_topic', '/cmd_vel')
+        self.declare_parameter('cmd_vel_topic', '/robot/cmd_vel')
 
         range_topic = self.get_parameter('range_topic').value
         cmd_vel_topic = self.get_parameter('cmd_vel_topic').value

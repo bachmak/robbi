@@ -30,8 +30,8 @@ class Robbi(Node):
         self.turn_angle = 185
         self.max_dy = 0.1
         range_topic = '/sensi/us'
-        cmd_vel_topic = '/cmd_vel'
-        cmd_action_topic = '/cmd_action'
+        cmd_vel_topic = '/robot/cmd_vel'
+        cmd_action_topic = '/robot/cmd_action'
         update_interval = 1 / 20.0
 
         # State

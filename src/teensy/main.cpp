@@ -40,14 +40,14 @@ struct Config {
           },
   };
 
-  const char *node_name = "robot";
+  std::string_view node_name = "robot";
 
-  const char *cmd_vel_topic = "cmd_vel";
-  const char *cmd_action_topic = "cmd_action";
-  const char *logs_topic = "logs";
-  const char *config_topic = "robot_config";
-  const char *echo_sub_topic = "echo_request";
-  const char *echo_pub_topic = "echo_response";
+  std::string_view cmd_vel_topic = "/robot/cmd_vel";
+  std::string_view cmd_action_topic = "/robot/cmd_action";
+  std::string_view logs_topic = "/robot/logs";
+  std::string_view config_topic = "/robot/config";
+  std::string_view echo_sub_topic = "/robot/echo_request";
+  std::string_view echo_pub_topic = "/robot/echo_response";
 
   Ms ping_interval{500};
   Ms ping_timeout{100};
