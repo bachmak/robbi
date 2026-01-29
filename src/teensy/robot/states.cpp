@@ -4,8 +4,6 @@
 #include "utils/io.h"
 #include "utils/time.h"
 
-#include <Arduino.h>
-
 #include <utility>
 
 namespace robot::states {
@@ -13,7 +11,7 @@ namespace {
 
 DegSec to_speed(Degree angle, Us dt) { return DegSec{angle.v / utils::time::to_sec(dt)}; }
 
-Pwm speed_to_pwm(DegSec speed, const MotorSettings &settings) {
+Pwm speed_to_pwm_ff(DegSec speed, const MotorSettings &settings) {
   const auto [zero_point, gain] = [&]() -> std::pair<Pwm, float> {
     if (speed == 0.0f) {
       return {settings.pwm_stop, 0.0f};
@@ -58,17 +56,19 @@ Pwm VelocityControl::update(Us dt, Degree curr_angle) {
   const auto speed = DegSec{speed_filter_.update(speed_raw.v)};
   const auto setpoint_speed = DegSec{ramp_.update(target_speed_.v, utils::time::to_sec(dt))};
 
-  const auto ff_pwm = speed_to_pwm(setpoint_speed, settings_);
-  const auto pwm_correction = Pwm{settings_.G_vel * (target_speed_.v - speed.v)};
+  const auto err = setpoint_speed - speed;
 
-  const auto pwm = ff_pwm + pwm_correction;
+  const auto pwm_ff = speed_to_pwm_ff(setpoint_speed, settings_);
+  const auto pwm_correction = Pwm{settings_.G_vel * err.v};
+
+  const auto pwm = pwm_ff + pwm_correction;
 
   if (settings_.log) {
     utils::io::debug("%s: state=vel-ctl, "
                      "err=%f, speed=(tg:%.2f,sp:%.2f,r:%.2f,f:%.2f), "
                      "pwm=(%d+%d=%d)",
-                     settings_.name.c_str(), target_speed_.v - speed.v, target_speed_.v,
-                     setpoint_speed.v, speed_raw.v, speed.v, ff_pwm.v, pwm_correction.v, pwm.v);
+                     settings_.name.c_str(), err.v, target_speed_.v, setpoint_speed.v, speed_raw.v,
+                     speed.v, pwm_ff.v, pwm_correction.v, pwm.v);
   }
 
   return pwm;
@@ -97,13 +97,13 @@ Pwm PositionControl::calc_pwm() const {
 
   const auto err = setpoint_distance - traveled_distance;
 
-  const auto pwm_base = speed_to_pwm(target_speed_, settings_);
+  const auto pwm_ff = speed_to_pwm_ff(target_speed_, settings_);
   const auto pwm_correction = Pwm{settings_.G_pos * err.v};
   const auto pwm = [&] {
     if (target_achieved(target_distance_, traveled_distance, target_speed_, settings_)) {
       return settings_.pwm_stop;
     }
-    return pwm_base + pwm_correction;
+    return pwm_ff + pwm_correction;
   }();
 
   if (settings_.log) {
@@ -111,7 +111,7 @@ Pwm PositionControl::calc_pwm() const {
                      "err=%f, dist=(tg:%.2f,sp:%.2f,r:%.2f), "
                      "pwm=(%d+%d=%d)",
                      settings_.name.c_str(), err.v, target_distance_.v, setpoint_distance.v,
-                     traveled_distance.v, pwm_base.v, pwm_correction.v, pwm.v);
+                     traveled_distance.v, pwm_ff.v, pwm_correction.v, pwm.v);
   }
 
   return pwm;
