@@ -95,6 +95,10 @@ void Motor::configure(std::string_view s, float value) {
     settings_.ramp_rise_rate = value;
   } else if (s == "ramp-fall-rate") {
     settings_.ramp_fall_rate = value;
+  } else if (s == "trajectory-rise-rate") {
+    settings_.trajectory_rise_rate = value;
+  } else if (s == "trajectory-fall-rate") {
+    settings_.trajectory_fall_rate = value;
   } else if (s == "speed-filter-alpha") {
     settings_.speed_filter_alpha = value;
   } else if (s == "fb-pwm-min") {

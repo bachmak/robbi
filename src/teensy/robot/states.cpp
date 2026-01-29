@@ -42,6 +42,56 @@ bool target_achieved(Degree target_distance, Degree traveled_distance, DegSec sp
   }
   return traveled_distance <= target_distance + tolerance;
 }
+
+utils::control::Trajectory build_trapezoidal_trajectory(const Degree target, const Us duration,
+                                                        const MotorSettings &settings) {
+  const auto rise_rate = settings.trajectory_rise_rate;
+  const auto fall_rate = settings.trajectory_fall_rate;
+  const auto T = utils::time::to_sec(duration);
+
+  const auto sign = (target >= 0.0f) ? 1.0f : -1.0f;
+  const auto dist = std::abs(static_cast<float>(target.v));
+
+  // Quadratic equation to find the cruise velocity:
+  //            2
+  // K / 2 * v_c  -  T * v_c  +  D  =  0
+  //
+  // Where:
+  // v_c = v_cruise
+  // K   = (1/rise_rate + 1/fall_rate)
+  // T   = total time
+  // D   = total distance
+
+  const auto inv_accel = (1.0f / rise_rate) + (1.0f / fall_rate);
+  const auto discriminant = T * T - 2.0f * dist * inv_accel;
+  if (discriminant < 0.0f) {
+    utils::io::error("Cannot create trajectory for target=%.2f, duration=%.2f", target.v,
+                     utils::time::to_sec(duration));
+    return utils::control::Trajectory{};
+  }
+
+  const auto v_cruise = (T - std::sqrt(discriminant)) / inv_accel;
+
+  const auto t_accel_end = v_cruise / rise_rate;
+  const auto t_decel_start = T - (v_cruise / fall_rate);
+
+  const auto t_accel_duration = t_accel_end;
+  const auto t_decel_duration = T - t_decel_start;
+
+  // uniform acceleration
+  const auto x_accel_dist = 0.5f * v_cruise * t_accel_duration;
+  const auto x_decel_dist = 0.5f * v_cruise * t_decel_duration;
+
+  const auto x_accel_end = x_accel_dist;
+  const auto x_decel_start = dist - x_decel_dist;
+
+  return utils::control::Trajectory{{
+      {0.0f, 0.0f},
+      {t_accel_end, x_accel_end * sign},
+      {t_decel_start, x_decel_start * sign},
+      {T, dist * sign},
+  }};
+}
 } // namespace
 
 VelocityControl::VelocityControl(const MotorSettings &settings, Degree curr_angle)
@@ -81,7 +131,9 @@ void VelocityControl::set_settings(const MotorSettings &settings) { settings_ = 
 PositionControl::PositionControl(const MotorSettings &settings, Degree start_angle,
                                  Degree target_distance, Us duration)
     : settings_(settings), start_angle_{start_angle}, target_distance_{target_distance},
-      target_speed_{target_distance.v / utils::time::to_sec(duration)}, full_angle_{start_angle} {}
+      target_speed_{target_distance.v / utils::time::to_sec(duration)},
+      trajectory_follower_{build_trapezoidal_trajectory(target_distance, duration, settings_)},
+      full_angle_{start_angle} {}
 
 Pwm PositionControl::update(Us dt, Degree curr_angle) {
   elapsed_time_ += dt;
@@ -93,7 +145,8 @@ void PositionControl::set_settings(const MotorSettings &settings) { settings_ = 
 
 Pwm PositionControl::calc_pwm() const {
   const auto traveled_distance = full_angle_ - start_angle_;
-  const auto setpoint_distance = Degree{target_speed_.v * utils::time::to_sec(elapsed_time_)};
+  const auto elapsed_sec = utils::time::to_sec(elapsed_time_);
+  const auto setpoint_distance = Degree{trajectory_follower_.current_value(elapsed_sec)};
 
   const auto err = setpoint_distance - traveled_distance;
 

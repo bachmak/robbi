@@ -2,6 +2,7 @@
 
 #include "types.h"
 
+#include <array>
 #include <string_view>
 
 namespace utils::control {
@@ -53,5 +54,22 @@ private:
   float rise_rate_; // units per second
   float fall_rate_; // units per second
   float value_ = 0.0f;
+};
+
+struct TrajectoryPoint {
+  float time;
+  float value;
+};
+
+using Trajectory = std::array<TrajectoryPoint, 4>;
+
+class TrajectoryFollower {
+public:
+  explicit TrajectoryFollower(const Trajectory &trajectory);
+
+  float current_value(float t) const;
+
+private:
+  Trajectory trajectory_;
 };
 } // namespace utils::control

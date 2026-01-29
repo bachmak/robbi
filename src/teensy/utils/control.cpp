@@ -99,4 +99,21 @@ void Ramp::configure(std::string_view setting, float value) {
     io::error("Ramp: unknown setting: %s", setting.data());
   }
 }
+
+TrajectoryFollower::TrajectoryFollower(const Trajectory &trajectory) : trajectory_(trajectory) {}
+
+float TrajectoryFollower::current_value(float t) const {
+  if (t <= trajectory_[0].time) {
+    return trajectory_[0].value;
+  }
+  for (size_t i = 1; i < trajectory_.size(); i++) {
+    if (t <= trajectory_[i].time) {
+      const auto &p0 = trajectory_[i - 1];
+      const auto &p1 = trajectory_[i];
+      const auto alpha = (t - p0.time) / (p1.time - p0.time);
+      return p0.value + alpha * (p1.value - p0.value);
+    }
+  }
+  return trajectory_.back().value;
+}
 } // namespace utils::control

@@ -40,6 +40,7 @@ private:
   Degree start_angle_;
   Degree target_distance_;
   DegSec target_speed_;
+  utils::control::TrajectoryFollower trajectory_follower_;
 
   Degree full_angle_;
   Us elapsed_time_{0};
