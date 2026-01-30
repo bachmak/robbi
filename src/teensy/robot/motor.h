@@ -19,6 +19,7 @@ public:
 
 public:
   void update(Us dt);
+  bool completed() const;
 
   void set_target_speed(DegSec speed);
   void set_target_distance(Degree distance, Us duration);

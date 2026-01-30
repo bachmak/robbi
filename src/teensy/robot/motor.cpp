@@ -59,6 +59,10 @@ void Motor::update(Us dt) {
   servo_.writeMicroseconds(final_pwm.v);
 }
 
+bool Motor::completed() const {
+  return std::visit([](const auto &state) { return state.completed(); }, state_);
+}
+
 void Motor::set_target_speed(DegSec speed) {
   std::visit(utils::visitor::overloads{
                  [speed](states::VelocityControl &state) { state.set_target_speed(speed); },

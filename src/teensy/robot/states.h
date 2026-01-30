@@ -11,6 +11,7 @@ public:
   explicit VelocityControl(const MotorSettings &settings, Degree curr_angle);
 
   Pwm update(Us dt, Degree position);
+  bool completed() const { return false; }
 
   void set_target_speed(DegSec speed);
   void set_settings(const MotorSettings &settings);
@@ -29,11 +30,17 @@ public:
                            Degree target_distance, Us duration);
 
   Pwm update(Us dt, Degree position);
+  bool completed() const { return completed_; }
 
   void set_settings(const MotorSettings &settings);
 
 private:
-  Pwm calc_pwm(Us dt, Degree position) const;
+  struct CalcPwmResult {
+    Pwm pwm;
+    bool target_achieved;
+  };
+
+  CalcPwmResult calc_pwm(Us dt, Degree position) const;
 
 private:
   MotorSettings settings_;
@@ -42,6 +49,7 @@ private:
   DegSec target_speed_;
   utils::control::TrajectoryFollower trajectory_follower_;
 
+  bool completed_{false};
   Degree full_angle_;
   Us elapsed_time_{0};
 };

@@ -12,6 +12,7 @@ public:
 
 public:
   void update(Us dt);
+  bool completed() const;
 
   void set_target_speed(const utils::geometry::Twist &twist);
   void set_target_distance(Meter distance, Us duration);

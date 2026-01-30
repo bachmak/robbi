@@ -155,12 +155,14 @@ PositionControl::PositionControl(const MotorSettings &settings, Degree start_ang
 Pwm PositionControl::update(Us dt, Degree curr_angle) {
   elapsed_time_ += dt;
   full_angle_ = utils::geometry::to_full(curr_angle, full_angle_);
-  return calc_pwm(dt, curr_angle);
+  const auto [pwm, completed] = calc_pwm(dt, curr_angle);
+  completed_ = completed;
+  return pwm;
 }
 
 void PositionControl::set_settings(const MotorSettings &settings) { settings_ = settings; }
 
-Pwm PositionControl::calc_pwm(Us dt, Degree position) const {
+auto PositionControl::calc_pwm(Us dt, Degree position) const -> CalcPwmResult {
   const auto traveled_distance = full_angle_ - start_angle_;
   const auto elapsed_sec = utils::time::to_sec(elapsed_time_);
   const auto setpoint_distance = Degree{trajectory_follower_.current_value(elapsed_sec)};
@@ -169,11 +171,11 @@ Pwm PositionControl::calc_pwm(Us dt, Degree position) const {
 
   const auto pwm_ff = speed_to_pwm_ff(target_speed_, settings_);
   const auto pwm_correction = Pwm{settings_.G_pos * err.v};
-  const auto pwm = [&] {
+  const auto result = [&]() -> CalcPwmResult {
     if (target_achieved(target_distance_, traveled_distance, target_speed_, settings_)) {
-      return settings_.pwm_stop;
+      return {settings_.pwm_stop, true};
     }
-    return pwm_ff + pwm_correction;
+    return {pwm_ff + pwm_correction, false};
   }();
 
   if (settings_.log) {
@@ -185,6 +187,6 @@ Pwm PositionControl::calc_pwm(Us dt, Degree position) const {
     );
   }
 
-  return pwm;
+  return result;
 }
 } // namespace robot::states
