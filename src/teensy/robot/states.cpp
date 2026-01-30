@@ -96,15 +96,15 @@ utils::control::Trajectory build_trapezoidal_trajectory(const Degree target, con
 void log(std::string_view motor, std::string_view state,                  //
          Us dt, float err, Degree pos,                                    //
          float target, float setpoint, float value_raw, float value_filt, //
-         Pwm pwm_ff, Pwm pwm_correction, Pwm pwm) {
+         Pwm pwm_ff, Pwm pwm_correction, Pwm pwm, int done) {
   utils::io::debug("motor=%s, state=%s,\n"
-                   "dt=%lldus, err=%.2f, pos=%.2f,\n"
+                   "pos=%.2f, dt=%lldus, err=%.2f,\n"
                    "tg=%.2f, sp=%.2f, raw=%.2f, filt=%.2f,\n"
-                   "pwm=(%d+%d=%d)",
+                   "pwm=(%d+%d=%d), done=%d",
                    motor.data(), state.data(),              //
-                   dt.count(), err, pos.v,                  //
+                   pos.v, dt.count(), err,                  //
                    target, setpoint, value_raw, value_filt, //
-                   pwm_ff.v, pwm_correction.v, pwm.v        //
+                   pwm_ff.v, pwm_correction.v, pwm.v, done  //
   );
 }
 
@@ -134,7 +134,7 @@ Pwm VelocityControl::update(Us dt, Degree curr_angle) {
         dt, err.v, curr_angle,             //
         target_speed_.v, setpoint_speed.v, //
         speed_raw.v, speed.v,              //
-        pwm_ff, pwm_correction, pwm        //
+        pwm_ff, pwm_correction, pwm, false //
     );
   }
 
@@ -179,11 +179,11 @@ auto PositionControl::calc_pwm(Us dt, Degree position) const -> CalcPwmResult {
   }();
 
   if (settings_.log) {
-    log(settings_.name, "pos-ctl",               //
-        dt, err.v, position,                     //
-        target_distance_.v, setpoint_distance.v, //
-        traveled_distance.v, 0.0f,               //
-        pwm_ff, pwm_correction, pwm              //
+    log(settings_.name, "pos-ctl",                                 //
+        dt, err.v, position,                                       //
+        target_distance_.v, setpoint_distance.v,                   //
+        traveled_distance.v, 0.0f,                                 //
+        pwm_ff, pwm_correction, result.pwm, result.target_achieved //
     );
   }
 
