@@ -24,7 +24,6 @@ struct Config {
           {
               .motor =
                   {
-                      .name = "left-wheel",
                       .control_pin = Pin{5},
                       .feedback_pin = Pin{6},
                   },
@@ -33,7 +32,6 @@ struct Config {
           {
               .motor =
                   {
-                      .name = "right-wheel",
                       .control_pin = Pin{7},
                       .feedback_pin = Pin{8},
                   },

@@ -33,7 +33,7 @@ public:
   void set_settings(const MotorSettings &settings);
 
 private:
-  Pwm calc_pwm() const;
+  Pwm calc_pwm(Us dt, Degree position) const;
 
 private:
   MotorSettings settings_;

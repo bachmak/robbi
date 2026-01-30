@@ -92,6 +92,22 @@ utils::control::Trajectory build_trapezoidal_trajectory(const Degree target, con
       {T, dist * sign},
   }};
 }
+
+void log(std::string_view motor, std::string_view state,                  //
+         Us dt, float err, Degree pos,                                    //
+         float target, float setpoint, float value_raw, float value_filt, //
+         Pwm pwm_ff, Pwm pwm_correction, Pwm pwm) {
+  utils::io::debug("motor=%s, state=%s,\n"
+                   "dt=%lldus, err=%.2f, pos=%.2f,\n"
+                   "tg=%.2f, sp=%.2f, raw=%.2f, filt=%.2f,\n"
+                   "pwm=(%d+%d=%d)",
+                   motor.data(), state.data(),              //
+                   dt.count(), err, pos.v,                  //
+                   target, setpoint, value_raw, value_filt, //
+                   pwm_ff.v, pwm_correction.v, pwm.v        //
+  );
+}
+
 } // namespace
 
 VelocityControl::VelocityControl(const MotorSettings &settings, Degree curr_angle)
@@ -114,11 +130,12 @@ Pwm VelocityControl::update(Us dt, Degree curr_angle) {
   const auto pwm = pwm_ff + pwm_correction;
 
   if (settings_.log) {
-    utils::io::debug("%s: state=vel-ctl, "
-                     "err=%f, speed=(tg:%.2f,sp:%.2f,r:%.2f,f:%.2f), "
-                     "pwm=(%d+%d=%d)",
-                     settings_.name.c_str(), err.v, target_speed_.v, setpoint_speed.v, speed_raw.v,
-                     speed.v, pwm_ff.v, pwm_correction.v, pwm.v);
+    log(settings_.name, "vel-ctl",         //
+        dt, err.v, curr_angle,             //
+        target_speed_.v, setpoint_speed.v, //
+        speed_raw.v, speed.v,              //
+        pwm_ff, pwm_correction, pwm        //
+    );
   }
 
   return pwm;
@@ -138,12 +155,12 @@ PositionControl::PositionControl(const MotorSettings &settings, Degree start_ang
 Pwm PositionControl::update(Us dt, Degree curr_angle) {
   elapsed_time_ += dt;
   full_angle_ = utils::geometry::to_full(curr_angle, full_angle_);
-  return calc_pwm();
+  return calc_pwm(dt, curr_angle);
 }
 
 void PositionControl::set_settings(const MotorSettings &settings) { settings_ = settings; }
 
-Pwm PositionControl::calc_pwm() const {
+Pwm PositionControl::calc_pwm(Us dt, Degree position) const {
   const auto traveled_distance = full_angle_ - start_angle_;
   const auto elapsed_sec = utils::time::to_sec(elapsed_time_);
   const auto setpoint_distance = Degree{trajectory_follower_.current_value(elapsed_sec)};
@@ -160,11 +177,12 @@ Pwm PositionControl::calc_pwm() const {
   }();
 
   if (settings_.log) {
-    utils::io::debug("%s: state=pos-ctl, "
-                     "err=%f, dist=(tg:%.2f,sp:%.2f,r:%.2f), "
-                     "pwm=(%d+%d=%d)",
-                     settings_.name.c_str(), err.v, target_distance_.v, setpoint_distance.v,
-                     traveled_distance.v, pwm_ff.v, pwm_correction.v, pwm.v);
+    log(settings_.name, "pos-ctl",               //
+        dt, err.v, position,                     //
+        target_distance_.v, setpoint_distance.v, //
+        traveled_distance.v, 0.0f,               //
+        pwm_ff, pwm_correction, pwm              //
+    );
   }
 
   return pwm;

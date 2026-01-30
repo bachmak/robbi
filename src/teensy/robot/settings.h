@@ -7,7 +7,7 @@
 namespace robot {
 
 struct MotorSettings {
-  std::string name = "motor";
+  std::string_view name = "motor";
 
   float G_vel = 0.3f;
   float G_pos = 1.0f;
@@ -56,12 +56,19 @@ struct RobotSettings {
   WheelSettings left = {
       .motor =
           {
+              .name = "left",
               .pwm_deadband_fwd = Pwm{30},
               .pwm_deadband_bwd = Pwm{27},
           },
   };
 
-  WheelSettings right;
+  WheelSettings right = {
+      .motor =
+          {
+              .name = "right",
+          },
+  };
+
   Meter width = Meter{0.102};
   Ms delay{0};
 };
