@@ -67,9 +67,16 @@ class TrajectoryFollower {
 public:
   explicit TrajectoryFollower(const Trajectory &trajectory);
 
-  float current_value(float t) const;
+  void update(float dt);
+
+  float value() const { return value_; }
+  float value_integrated() const { return value_integrated_; }
+  const Trajectory &trajectory() const { return trajectory_; }
 
 private:
   Trajectory trajectory_;
+  float t_{0.0f};
+  float value_{0.0f};
+  float value_integrated_{0.0f};
 };
 } // namespace utils::control

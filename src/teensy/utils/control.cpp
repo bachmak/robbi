@@ -15,6 +15,21 @@ PIDParams to_params(const PIDSettings &settings) {
       .K_d = settings.G * settings.T_d,
   };
 }
+
+float get_trajectory_value(const Trajectory &trajectory, const float t) {
+  if (t <= trajectory[0].time) {
+    return trajectory[0].value;
+  }
+  for (size_t i = 1; i < trajectory.size(); i++) {
+    if (t <= trajectory[i].time) {
+      const auto &p0 = trajectory[i - 1];
+      const auto &p1 = trajectory[i];
+      const auto alpha = (t - p0.time) / (p1.time - p0.time);
+      return p0.value + alpha * (p1.value - p0.value);
+    }
+  }
+  return trajectory.back().value;
+}
 } // namespace
 
 PID::PID(const PIDSettings &settings) : settings_(settings), params_(to_params(settings)) {}
@@ -102,18 +117,9 @@ void Ramp::configure(std::string_view setting, float value) {
 
 TrajectoryFollower::TrajectoryFollower(const Trajectory &trajectory) : trajectory_(trajectory) {}
 
-float TrajectoryFollower::current_value(float t) const {
-  if (t <= trajectory_[0].time) {
-    return trajectory_[0].value;
-  }
-  for (size_t i = 1; i < trajectory_.size(); i++) {
-    if (t <= trajectory_[i].time) {
-      const auto &p0 = trajectory_[i - 1];
-      const auto &p1 = trajectory_[i];
-      const auto alpha = (t - p0.time) / (p1.time - p0.time);
-      return p0.value + alpha * (p1.value - p0.value);
-    }
-  }
-  return trajectory_.back().value;
+void TrajectoryFollower::update(const float dt) {
+  t_ += dt;
+  value_ = get_trajectory_value(trajectory_, t_);
+  value_integrated_ += value_ * dt;
 }
 } // namespace utils::control
