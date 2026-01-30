@@ -24,6 +24,8 @@ struct Config {
           {
               .motor =
                   {
+                      // pwm deadband: fwd = 1530, bwd = 1486
+                      .name = "left",
                       .control_pin = Pin{5},
                       .feedback_pin = Pin{6},
                   },
@@ -32,8 +34,11 @@ struct Config {
           {
               .motor =
                   {
+                      // pwm deadband: fwd = 1530, bwd = 1488
+                      .name = "right",
                       .control_pin = Pin{7},
                       .feedback_pin = Pin{8},
+                      .pwm_deadband_bwd = Pwm{20},
                   },
           },
   };

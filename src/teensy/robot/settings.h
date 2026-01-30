@@ -53,21 +53,8 @@ struct WheelSettings {
 };
 
 struct RobotSettings {
-  WheelSettings left = {
-      .motor =
-          {
-              .name = "left",
-              .pwm_deadband_fwd = Pwm{30},
-              .pwm_deadband_bwd = Pwm{27},
-          },
-  };
-
-  WheelSettings right = {
-      .motor =
-          {
-              .name = "right",
-          },
-  };
+  WheelSettings left;
+  WheelSettings right;
 
   Meter width = Meter{0.102};
   Ms delay{0};
