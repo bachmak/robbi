@@ -41,7 +41,7 @@ struct MotorSettings {
   bool log = true;
 
   Degree stop_tolerance_base{0.0f};
-  float stop_tolerance_gain{0.1};
+  float stop_tolerance_gain = 0.0f;
 };
 
 struct WheelSettings {

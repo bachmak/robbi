@@ -43,8 +43,8 @@ bool target_achieved(Degree target_distance, Degree traveled_distance, DegSec sp
   return traveled_distance <= target_distance + tolerance;
 }
 
-utils::control::Trajectory build_trapezoidal_trajectory(const Degree target, const Us duration,
-                                                        const MotorSettings &settings) {
+utils::control::Trajectory build_velocity_trajectory(const Degree target, const Us duration,
+                                                     const MotorSettings &settings) {
   const auto rise_rate = settings.trajectory_rise_rate;
   const auto fall_rate = settings.trajectory_fall_rate;
   const auto T = utils::time::to_sec(duration);
@@ -75,21 +75,11 @@ utils::control::Trajectory build_trapezoidal_trajectory(const Degree target, con
   const auto t_accel_end = v_cruise / rise_rate;
   const auto t_decel_start = T - (v_cruise / fall_rate);
 
-  const auto t_accel_duration = t_accel_end;
-  const auto t_decel_duration = T - t_decel_start;
-
-  // uniform acceleration
-  const auto x_accel_dist = 0.5f * v_cruise * t_accel_duration;
-  const auto x_decel_dist = 0.5f * v_cruise * t_decel_duration;
-
-  const auto x_accel_end = x_accel_dist;
-  const auto x_decel_start = dist - x_decel_dist;
-
   return utils::control::Trajectory{{
       {0.0f, 0.0f},
-      {t_accel_end, x_accel_end * sign},
-      {t_decel_start, x_decel_start * sign},
-      {T, dist * sign},
+      {t_accel_end, v_cruise * sign},
+      {t_decel_start, v_cruise * sign},
+      {T, 0.0f},
   }};
 }
 
@@ -148,15 +138,22 @@ void VelocityControl::set_settings(const MotorSettings &settings) { settings_ = 
 PositionControl::PositionControl(const MotorSettings &settings, Degree start_angle,
                                  Degree target_distance, Us duration)
     : settings_(settings), start_angle_{start_angle}, target_distance_{target_distance},
-      target_speed_{target_distance.v / utils::time::to_sec(duration)},
-      trajectory_follower_{build_trapezoidal_trajectory(target_distance, duration, settings_)},
-      full_angle_{start_angle} {}
+      trajectory_follower_{build_velocity_trajectory(target_distance, duration, settings_)},
+      full_angle_{start_angle} {
+  utils::io::info("PositionControl: target=%.2f, duration=%.2f. Trajectory:", //
+                  target_distance.v, utils::time::to_sec(duration));
+  for (const auto &pt : trajectory_follower_.trajectory()) {
+    utils::io::info("--> t=%.2f, value=%.2f", pt.time, pt.value);
+  }
+}
 
 Pwm PositionControl::update(Us dt, Degree curr_angle) {
-  elapsed_time_ += dt;
   full_angle_ = utils::geometry::to_full(curr_angle, full_angle_);
+  trajectory_follower_.update(utils::time::to_sec(dt));
+
   const auto [pwm, completed] = calc_pwm(dt, curr_angle);
   completed_ = completed;
+
   return pwm;
 }
 
@@ -164,15 +161,15 @@ void PositionControl::set_settings(const MotorSettings &settings) { settings_ = 
 
 auto PositionControl::calc_pwm(Us dt, Degree position) const -> CalcPwmResult {
   const auto traveled_distance = full_angle_ - start_angle_;
-  const auto elapsed_sec = utils::time::to_sec(elapsed_time_);
-  const auto setpoint_distance = Degree{trajectory_follower_.current_value(elapsed_sec)};
+  const auto setpoint_speed = DegSec{trajectory_follower_.value()};
+  const auto setpoint_distance = Degree{trajectory_follower_.value_integrated()};
 
   const auto err = setpoint_distance - traveled_distance;
 
-  const auto pwm_ff = speed_to_pwm_ff(target_speed_, settings_);
+  const auto pwm_ff = speed_to_pwm_ff(setpoint_speed, settings_);
   const auto pwm_correction = Pwm{settings_.G_pos * err.v};
   const auto result = [&]() -> CalcPwmResult {
-    if (target_achieved(target_distance_, traveled_distance, target_speed_, settings_)) {
+    if (target_achieved(target_distance_, traveled_distance, setpoint_speed, settings_)) {
       return {settings_.pwm_stop, true};
     }
     return {pwm_ff + pwm_correction, false};
