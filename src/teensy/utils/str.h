@@ -6,7 +6,6 @@
 
 namespace utils::str {
 
-std::string_view trim(std::string_view s);
 std::vector<std::string_view> split(std::string_view s);
 
 std::optional<float> to_float(std::string_view str);

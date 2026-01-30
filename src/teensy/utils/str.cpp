@@ -4,19 +4,6 @@
 
 namespace utils::str {
 
-std::string_view trim(const std::string_view &str) {
-  auto start = std::find_if(str.begin(), str.end(), [](auto ch) { return !std::isspace(ch); });
-
-  if (start == str.end()) {
-    return "";
-  }
-
-  auto end =
-      std::find_if(str.rbegin(), str.rend(), [](auto ch) { return !std::isspace(ch); }).base();
-
-  return std::string_view(start, end - start);
-}
-
 std::vector<std::string_view> split(std::string_view s) {
   constexpr auto delim = ' ';
   auto result = std::vector<std::string_view>{};

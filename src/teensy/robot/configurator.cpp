@@ -38,11 +38,7 @@ Configurator::Configurator(Robot &robot, ros::Node &node, std::string_view topic
     : robot_(robot), //
       subscription_(node, topic_name.data(), [this](std::string_view str) {
         if (auto cmd = process_command(*this, str); cmd.has_value()) {
-          configure(cmd->setting, cmd->value);
+          robot_.configure(cmd->setting, cmd->value);
         }
       }) {}
-
-void Configurator::configure(std::string_view setting, float value) {
-  robot_.configure(setting, value);
-}
 } // namespace robot

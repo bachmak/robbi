@@ -13,9 +13,6 @@ public:
   auto &subscription() { return subscription_; }
 
 private:
-  void configure(std::string_view setting, float value);
-
-private:
   Robot &robot_;
   ros::Subscription<std::string_view> subscription_;
 };
