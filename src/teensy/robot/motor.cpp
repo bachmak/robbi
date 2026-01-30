@@ -26,8 +26,8 @@ Degree read_position(const MotorSettings &settings) {
   const auto dc_min = settings.feedback_pwm_duty_cycle_min;
   const auto dc_max = settings.feedback_pwm_duty_cycle_max;
 
-  // TODO: revisit correctness of the formula
-  const auto angle = Degree{359 - ((dc - dc_min) * 360.0f) / (dc_max - dc_min + 0.01f)};
+  const auto normalized = (dc - dc_min) / (dc_max - dc_min);
+  const auto angle = Degree{360.0f - (normalized * 360.0f)};
 
   return std::clamp(angle, Degree{0}, Degree{360});
 }
