@@ -13,6 +13,7 @@
 
 namespace robot {
 namespace {
+
 void init_pins(const MotorSettings &settings) {
   pinMode(settings.control_pin.v, OUTPUT);
   pinMode(settings.feedback_pin.v, INPUT);
@@ -53,7 +54,14 @@ void Motor::update(Us dt) {
     if (pwm_override_.has_value()) {
       return *pwm_override_;
     }
-    return std::clamp(pwm, settings_.pwm_min, settings_.pwm_max);
+
+    const auto pwm_clamped = std::clamp(pwm, settings_.pwm_min, settings_.pwm_max);
+    if (pwm_clamped != pwm) {
+      utils::io::warning("Motor=%s: pwm clamped: requested=%d, clamped=%d", //
+                         settings_.name.data(), pwm.v, pwm_clamped.v);
+    }
+
+    return pwm_clamped;
   }();
 
   servo_.writeMicroseconds(final_pwm.v);

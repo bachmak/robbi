@@ -32,12 +32,14 @@ template <typename T, typename Tag> struct StrongType {
   friend bool operator<(Self a, Self b) { return a.v < b.v; }
   friend bool operator>(Self a, Self b) { return a.v > b.v; }
   friend bool operator==(Self a, Self b) { return a.v == b.v; }
+  friend bool operator!=(Self a, Self b) { return a.v != b.v; }
   friend bool operator<=(Self a, Self b) { return a.v <= b.v; }
   friend bool operator>=(Self a, Self b) { return a.v >= b.v; }
 
   friend bool operator<(Self a, T b) { return a.v < b; }
   friend bool operator>(Self a, T b) { return a.v > b; }
   friend bool operator==(Self a, T b) { return a.v == b; }
+  friend bool operator!=(Self a, T b) { return a.v != b; }
   friend bool operator<=(Self a, T b) { return a.v <= b; }
   friend bool operator>=(Self a, T b) { return a.v >= b; }
 

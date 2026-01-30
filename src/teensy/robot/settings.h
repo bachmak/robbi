@@ -22,9 +22,9 @@ struct MotorSettings {
   float feedback_pwm_duty_cycle_min = 0.029f;
   float feedback_pwm_duty_cycle_max = 0.971f;
 
-  Pwm pwm_min{1400};
+  Pwm pwm_min{1300};
   Pwm pwm_stop{1508};
-  Pwm pwm_max{1600};
+  Pwm pwm_max{1700};
 
   Pwm pwm_deadband_fwd{22};
   Pwm pwm_deadband_bwd{22};
