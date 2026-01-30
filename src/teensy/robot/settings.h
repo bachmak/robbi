@@ -29,9 +29,6 @@ struct MotorSettings {
   Pwm pwm_deadband_fwd{22};
   Pwm pwm_deadband_bwd{22};
 
-  float pwm_gain_fwd = 1.0f;
-  float pwm_gain_bwd = 1.0f;
-
   float ff_gain_fwd = 0.155f;
   float ff_gain_bwd = 0.155f;
 

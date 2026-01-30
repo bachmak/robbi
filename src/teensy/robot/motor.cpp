@@ -127,10 +127,6 @@ void Motor::configure(std::string_view s, float value) {
     settings_.pwm_deadband_fwd = pwm;
   } else if (s == "pwm-deadband-bwd") {
     settings_.pwm_deadband_bwd = pwm;
-  } else if (s == "pwm-gain-fwd") {
-    settings_.pwm_gain_fwd = value;
-  } else if (s == "pwm-gain-bwd") {
-    settings_.pwm_gain_bwd = value;
   } else if (s == "ff-gain-fwd") {
     settings_.ff_gain_fwd = value;
   } else if (s == "ff-gain-bwd") {
