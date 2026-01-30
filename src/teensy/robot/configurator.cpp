@@ -13,8 +13,8 @@ struct ConfigCommand {
 };
 
 std::optional<ConfigCommand> process_command(Configurator &configurator, std::string_view str) {
-  utils::io::debug("RobotConfiguration: received message: %.*s", static_cast<int>(str.size()),
-                   str.data());
+  utils::io::info("RobotConfiguration: received message: %.*s", static_cast<int>(str.size()),
+                  str.data());
 
   const auto tokens = utils::str::split(str);
   if (tokens.size() != 2) {

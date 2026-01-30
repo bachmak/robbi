@@ -104,7 +104,7 @@ void Robot::set_target_rotation(Degree rotation, Us duration) {
 }
 
 void Robot::set_stop(bool value) {
-  utils::io::debug("Setting stop: stop = %s", value ? "true" : "false");
+  utils::io::info("Setting stop: stop = %s", value ? "true" : "false");
 
   left_.set_stop(value);
   right_.set_stop(value);
