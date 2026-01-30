@@ -38,8 +38,8 @@ struct MotorSettings {
   float ramp_rise_rate = 100.0f;
   float ramp_fall_rate = 100.0f;
 
-  float trajectory_rise_rate = 100.0f;
-  float trajectory_fall_rate = 100.0f;
+  float trajectory_rise_rate = 400.0f;
+  float trajectory_fall_rate = 400.0f;
 
   bool log = true;
 

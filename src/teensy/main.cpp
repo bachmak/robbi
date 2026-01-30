@@ -50,7 +50,7 @@ struct Config {
   Ms ping_interval{500};
   Ms ping_timeout{100};
 
-  Ms spin_timeout{100};
+  Ms spin_timeout{1};
   Ms connection_check_period{500};
 
   Pin debug_pin{13};
