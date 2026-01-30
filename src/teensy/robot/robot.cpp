@@ -69,6 +69,8 @@ void Robot::update(Us dt) {
   utils::time::delay(settings_.delay);
 }
 
+bool Robot::completed() const { return left_.completed() && right_.completed(); }
+
 void Robot::set_target_speed(const utils::geometry::Twist &twist) {
   const auto speeds = to_motor_speeds(twist, settings_);
 
@@ -117,7 +119,7 @@ void Robot::configure(std::string_view setting, float value) {
       return motor.configure(*motor_setting, value);
     }
     if (subsetting == "radius") {
-      settings.radius = Meter{static_cast<int>(value)};
+      settings.radius = Meter{value};
     }
   };
 
