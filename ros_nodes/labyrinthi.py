@@ -25,15 +25,15 @@ class Labyrinti(Node):
         self.wait_duration = 0.5 # sec
         range_topic = '/sensi/us'
         cmd_action_topic = '/robot/cmd_action'
-        action_complete_topic = '/robot/action_complete'
         update_interval = 1 / 20.0
+        self.logging_interval = 1.0 # sec
 
         # State
         self.state = None
         self.us_measurements = { "angle_0": None, "angle_90": None, "angle_180": None }
         self.current_section = None
-        self.action_complete = False
         self.curr_state_time = None
+        self.last_log_time = time.time()
 
         # ROS2 entities
         self.create_subscription(Range, range_topic, self.on_range, 10)
@@ -165,13 +165,6 @@ class Labyrinti(Node):
             self.us_measurements[fid] = msg.range
     
 
-    def on_action_complete(self, msg):
-        if self.state == "WAIT":
-            self.get_logger().info(f"Unexpected action complete in {self.state} state")
-        
-        self.action_complete = True
-
-
     def switch_state(self, state):
         self.state = state
         self.curr_state_time = time.perf_counter()
@@ -186,7 +179,12 @@ class Labyrinti(Node):
 
     def update(self):
         self.update_any()
-        self.get_logger().info(f"update: state={self.state}")
+
+        # Periodic logging based on logging_interval
+        current_time = time.time()
+        if current_time - self.last_log_time >= self.logging_interval:
+            self.get_logger().info(f"update: state={self.state}")
+            self.last_log_time = current_time
 
         if self.state == "MOVE":
             return self.update_move()
@@ -210,7 +208,8 @@ class Labyrinti(Node):
     
 
     def update_move(self):
-        if not self.action_complete:
+        elapsed = time.perf_counter() - self.curr_state_time
+        if self.current_section.move_duration + 0.5 > elapsed:
             return
 
         self.switch_state("WAIT")
@@ -224,7 +223,8 @@ class Labyrinti(Node):
     
 
     def update_rotate(self):
-        if not self.action_complete:
+        elapsed = time.perf_counter() - self.curr_state_time
+        if self.current_section.rotation_duration + 0.5 > elapsed:
             return
         
         self.switch_state("MOVE")
