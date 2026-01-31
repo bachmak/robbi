@@ -46,14 +46,14 @@ struct MotorSettings {
 
 struct WheelSettings {
   robot::MotorSettings motor = {};
-  Meter radius = Meter{0.0326};
+  Meter radius = Meter{0.033};
 };
 
 struct RobotSettings {
   WheelSettings left;
   WheelSettings right;
 
-  Meter width = Meter{0.102};
+  Meter width = Meter{0.1042};
   Ms delay{0};
 };
 } // namespace robot
