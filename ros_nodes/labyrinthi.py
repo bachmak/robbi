@@ -40,25 +40,28 @@ class Labyrinti(Node):
         self.create_timer(update_interval, self.update)
         self.action_pub = self.create_publisher(String, cmd_action_topic, 10)
 
+        adjusted_neg_90 = -89.67
+        adjusted_180 = 182.0
+
         self.sections = deque([
             # 1
             Section(
-                distance=2.60,
+                distance=2.595,
                 move_duration=10.0,
                 expected_us_fwd=None,
                 expected_us_left=None,
                 expected_us_right=None,
-                rotation_angle=-90.0,
+                rotation_angle=adjusted_neg_90,
                 rotation_duration=2.0,
             ),
             # 2
             Section(
-                distance=0.98,
+                distance=0.96,
                 move_duration=6.0,
                 expected_us_fwd=None,
                 expected_us_left=None,
                 expected_us_right=None,
-                rotation_angle=-90.0,
+                rotation_angle=adjusted_neg_90,
                 rotation_duration=2.0,
             ),
             # 3
@@ -68,7 +71,7 @@ class Labyrinti(Node):
                 expected_us_fwd=None,
                 expected_us_left=None,
                 expected_us_right=None,
-                rotation_angle=-90.0,
+                rotation_angle=adjusted_neg_90,
                 rotation_duration=2.0,
             ),
             # 4
@@ -83,7 +86,7 @@ class Labyrinti(Node):
             ),
             # 5
             Section(
-                distance=0.456,
+                distance=0.45,
                 move_duration=4.0,
                 expected_us_fwd=None,
                 expected_us_left=None,
@@ -98,7 +101,7 @@ class Labyrinti(Node):
                 expected_us_fwd=None,
                 expected_us_left=None,
                 expected_us_right=None,
-                rotation_angle=-90.0,
+                rotation_angle=adjusted_neg_90,
                 rotation_duration=2.0,
             ),
             # 7
@@ -108,7 +111,7 @@ class Labyrinti(Node):
                 expected_us_fwd=None,
                 expected_us_left=None,
                 expected_us_right=None,
-                rotation_angle=-180.0,
+                rotation_angle=adjusted_180,
                 rotation_duration=4.0,
             ),
             # 8
@@ -138,7 +141,7 @@ class Labyrinti(Node):
                 expected_us_fwd=None,
                 expected_us_left=None,
                 expected_us_right=None,
-                rotation_angle=180.0,
+                rotation_angle=adjusted_180,
                 rotation_duration=4.0,
             ),
         ])
