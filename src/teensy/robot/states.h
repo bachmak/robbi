@@ -11,7 +11,6 @@ public:
   explicit VelocityControl(const MotorSettings &settings, Degree curr_angle);
 
   Pwm update(Us dt, Degree position);
-  bool completed() const { return false; }
 
   void set_target_speed(DegSec speed);
   void set_settings(const MotorSettings &settings);
@@ -30,7 +29,6 @@ public:
                            Degree target_distance, Us duration);
 
   Pwm update(Us dt, Degree position);
-  bool completed() const { return completed_; }
 
   void set_settings(const MotorSettings &settings);
 

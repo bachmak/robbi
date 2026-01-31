@@ -69,8 +69,6 @@ void Robot::update(Us dt) {
   utils::time::delay(settings_.delay);
 }
 
-bool Robot::completed() const { return left_.completed() && right_.completed(); }
-
 void Robot::set_target_speed(const utils::geometry::Twist &twist) {
   const auto speeds = to_motor_speeds(twist, settings_);
 

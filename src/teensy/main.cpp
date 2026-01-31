@@ -58,7 +58,6 @@ struct Config {
   std::string config_topic = node_name + "/config";
   std::string echo_sub_topic = node_name + "/echo_request";
   std::string echo_pub_topic = node_name + "/echo_response";
-  std::string action_complete_topic = node_name + "/action_complete";
 
   Ms ping_interval{500};
   Ms ping_timeout{100};
@@ -85,7 +84,6 @@ void do_loop(const Config &config) {
   utils::io::redirect_to(log_publisher);
 
   auto echo_publisher = ros::Publisher<std::string_view>{node, config.echo_pub_topic};
-  auto action_complete_publisher = ros::Publisher<int32_t>{node, config.action_complete_topic};
 
   auto robot = robot::Robot{config.robot_settings};
   auto configurator = robot::Configurator{robot, node, config.config_topic};
@@ -115,9 +113,6 @@ void do_loop(const Config &config) {
 
     executor.spin_some(config.spin_timeout);
     robot.update(dt);
-    if (robot.completed()) {
-      action_complete_publisher.publish(1);
-    }
   }
 
   utils::io::redirect_reset();
