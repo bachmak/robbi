@@ -13,7 +13,7 @@ auto visit(MotorSettings &settings, std::string_view s, const Visitor &visitor) 
   if (s == "g-pos") {
     return visitor(settings.G_pos);
   }
-  if (s == "speed-filter-alpha ") {
+  if (s == "speed-filter-alpha") {
     return visitor(settings.speed_filter_alpha);
   }
   if (s == "feedback-pwm-min") {
@@ -22,10 +22,10 @@ auto visit(MotorSettings &settings, std::string_view s, const Visitor &visitor) 
   if (s == "feedback-pwm-max") {
     return visitor(settings.feedback_pwm_max);
   }
-  if (s == "feedback-pwm-duty-cycle-min ") {
+  if (s == "feedback-pwm-duty-cycle-min") {
     return visitor(settings.feedback_pwm_duty_cycle_min);
   }
-  if (s == "feedback-pwm-duty-cycle-max ") {
+  if (s == "feedback-pwm-duty-cycle-max") {
     return visitor(settings.feedback_pwm_duty_cycle_max);
   }
   if (s == "pwm-min") {
@@ -43,19 +43,19 @@ auto visit(MotorSettings &settings, std::string_view s, const Visitor &visitor) 
   if (s == "pwm-deadband-bwd") {
     return visitor(settings.pwm_deadband_bwd);
   }
-  if (s == "ff-gain-fwd ") {
+  if (s == "ff-gain-fwd") {
     return visitor(settings.ff_gain_fwd);
   }
-  if (s == "ff-gain-bwd ") {
+  if (s == "ff-gain-bwd") {
     return visitor(settings.ff_gain_bwd);
   }
-  if (s == "ramp-rise-rate ") {
+  if (s == "ramp-rise-rate") {
     return visitor(settings.ramp_rise_rate);
   }
-  if (s == "ramp-fall-rate ") {
+  if (s == "ramp-fall-rate") {
     return visitor(settings.ramp_fall_rate);
   }
-  if (s == "trajectory-rise-rate ") {
+  if (s == "trajectory-rise-rate") {
     return visitor(settings.trajectory_rise_rate);
   }
   if (s == "trajectory-fall-rate") {
