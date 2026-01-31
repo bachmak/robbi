@@ -233,15 +233,15 @@ class Labyrinti(Node):
 
 
     def cmd_move(self, meters, duration):
+        self.get_logger().info(f"cmd_move: meters={meters}, duration={duration}")
         action = String(data=f"move {meters} {duration}")
         self.action_pub.publish(action)
-        self.action_complete = False
 
 
     def cmd_rotate(self, degrees, duration):
+        self.get_logger().info(f"cmd_rotate: degrees={degrees}, duration={duration}")
         action = String(data=f"rotate {degrees} {duration}")
         self.action_pub.publish(action)
-        self.action_complete = False
 
 
     def destroy(self):
