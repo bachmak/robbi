@@ -54,7 +54,7 @@ class Labyrinti(Node):
             # 2
             Section(
                 distance=0.98,
-                move_duration=5.0,
+                move_duration=6.0,
                 expected_us_fwd=None,
                 expected_us_left=None,
                 expected_us_right=None,
@@ -64,7 +64,7 @@ class Labyrinti(Node):
             # 3
             Section(
                 distance=0.75,
-                move_duration=4.0,
+                move_duration=5.5,
                 expected_us_fwd=None,
                 expected_us_left=None,
                 expected_us_right=None,
@@ -74,7 +74,7 @@ class Labyrinti(Node):
             # 4
             Section(
                 distance=0.70,
-                move_duration=4.0,
+                move_duration=5.0,
                 expected_us_fwd=None,
                 expected_us_left=None,
                 expected_us_right=None,
@@ -84,7 +84,7 @@ class Labyrinti(Node):
             # 5
             Section(
                 distance=0.456,
-                move_duration=3.0,
+                move_duration=4.0,
                 expected_us_fwd=None,
                 expected_us_left=None,
                 expected_us_right=None,
@@ -94,7 +94,7 @@ class Labyrinti(Node):
             # 6
             Section(
                 distance=0.775,
-                move_duration=4.0,
+                move_duration=5.5,
                 expected_us_fwd=None,
                 expected_us_left=None,
                 expected_us_right=None,
@@ -104,7 +104,7 @@ class Labyrinti(Node):
             # 7
             Section(
                 distance=1.375,
-                move_duration=5.0,
+                move_duration=7.5,
                 expected_us_fwd=None,
                 expected_us_left=None,
                 expected_us_right=None,
@@ -114,7 +114,7 @@ class Labyrinti(Node):
             # 8
             Section(
                 distance=0.55,
-                move_duration=3.0,
+                move_duration=5.0,
                 expected_us_fwd=None,
                 expected_us_left=None,
                 expected_us_right=None,
@@ -124,7 +124,7 @@ class Labyrinti(Node):
             # 9
             Section(
                 distance=0.65,
-                move_duration=3.0,
+                move_duration=5.0,
                 expected_us_fwd=None,
                 expected_us_left=None,
                 expected_us_right=None,
@@ -134,22 +134,12 @@ class Labyrinti(Node):
             # 10
             Section(
                 distance=0.475,
-                move_duration=3.0,
+                move_duration=5.0,
                 expected_us_fwd=None,
                 expected_us_left=None,
                 expected_us_right=None,
-                rotation_angle=75.0,
-                rotation_duration=2.0,
-            ),
-            # 11
-            Section(
-                distance=0.415,
-                move_duration=3.0,
-                expected_us_fwd=None,
-                expected_us_left=None,
-                expected_us_right=None,
-                rotation_angle=105.0,
-                rotation_duration=2.0,
+                rotation_angle=180.0,
+                rotation_duration=4.0,
             ),
         ])
 
