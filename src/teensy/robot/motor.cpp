@@ -133,10 +133,6 @@ void Motor::configure(std::string_view s, float value) {
     settings_.G_pos = value;
   } else if (s == "log") {
     settings_.log = value != 0.0f;
-  } else if (s == "stop-tolerance-base") {
-    settings_.stop_tolerance_base = Degree{value};
-  } else if (s == "stop-tolerance-gain") {
-    settings_.stop_tolerance_gain = value;
   } else {
     utils::io::error("Motor: unknown settins: %s", s.data());
   }

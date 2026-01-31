@@ -32,15 +32,11 @@ Pwm speed_to_pwm_ff(DegSec speed, const MotorSettings &settings) {
   return pwm;
 }
 
-bool target_achieved(Degree target_distance, Degree traveled_distance, DegSec speed,
-                     const MotorSettings &settings) {
-  const auto tolerance =
-      settings.stop_tolerance_base + Degree{settings.stop_tolerance_gain * abs(speed).v};
-
+bool target_achieved(Degree target_distance, Degree traveled_distance) {
   if (target_distance > 0) {
-    return traveled_distance >= target_distance - tolerance;
+    return traveled_distance >= target_distance;
   }
-  return traveled_distance <= target_distance + tolerance;
+  return traveled_distance <= target_distance;
 }
 
 utils::control::Trajectory build_velocity_trajectory(const Degree target, const Us duration,
@@ -169,7 +165,7 @@ auto PositionControl::calc_pwm(Us dt, Degree position) const -> CalcPwmResult {
   const auto pwm_ff = speed_to_pwm_ff(setpoint_speed, settings_);
   const auto pwm_correction = Pwm{settings_.G_pos * err.v};
   const auto result = [&]() -> CalcPwmResult {
-    if (target_achieved(target_distance_, traveled_distance, setpoint_speed, settings_)) {
+    if (target_achieved(target_distance_, traveled_distance)) {
       return {settings_.pwm_stop, true};
     }
     return {pwm_ff + pwm_correction, false};
