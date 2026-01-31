@@ -24,6 +24,7 @@ class Labyrinti(Node):
         cmd_action_topic = '/robot/cmd_action'
         update_interval = 1 / 20.0
         self.logging_interval = 1.0 # sec
+        self.wait_margin = 0.5 # sec
 
         # State
         self.state = None
@@ -170,7 +171,7 @@ class Labyrinti(Node):
 
     def update_move(self):
         elapsed = time.perf_counter() - self.curr_state_time
-        if self.current_section.move_duration + 0.5 > elapsed:
+        if self.current_section.move_duration + self.wait_margin > elapsed:
             return
 
         self.switch_state("WAIT")
@@ -185,7 +186,7 @@ class Labyrinti(Node):
 
     def update_rotate(self):
         elapsed = time.perf_counter() - self.curr_state_time
-        if self.current_section.rotation_duration + 0.5 > elapsed:
+        if self.current_section.rotation_duration + self.wait_margin > elapsed:
             return
         
         self.switch_state("MOVE")
