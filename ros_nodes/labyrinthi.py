@@ -30,7 +30,7 @@ class Labyrinti(Node):
 
         # State
         self.state = None
-        self.us_measurements = None
+        self.us_measurements = { "angle_0": None, "angle_90": None, "angle_180": None }
         self.current_section = None
         self.action_complete = False
         self.curr_state_time = None
@@ -40,11 +40,14 @@ class Labyrinti(Node):
         self.create_timer(update_interval, self.update)
         self.action_pub = self.create_publisher(String, cmd_action_topic, 10)
 
-        self.sections = deque[
+        self.sections = deque([
             # 1
             Section(
                 distance=2.60,
                 move_duration=10.0,
+                expected_us_fwd=None,
+                expected_us_left=None,
+                expected_us_right=None,
                 rotation_angle=-90.0,
                 rotation_duration=2.0,
             ),
@@ -52,6 +55,9 @@ class Labyrinti(Node):
             Section(
                 distance=0.98,
                 move_duration=5.0,
+                expected_us_fwd=None,
+                expected_us_left=None,
+                expected_us_right=None,
                 rotation_angle=-90.0,
                 rotation_duration=2.0,
             ),
@@ -59,6 +65,9 @@ class Labyrinti(Node):
             Section(
                 distance=0.75,
                 move_duration=4.0,
+                expected_us_fwd=None,
+                expected_us_left=None,
+                expected_us_right=None,
                 rotation_angle=-90.0,
                 rotation_duration=2.0,
             ),
@@ -66,6 +75,9 @@ class Labyrinti(Node):
             Section(
                 distance=0.70,
                 move_duration=4.0,
+                expected_us_fwd=None,
+                expected_us_left=None,
+                expected_us_right=None,
                 rotation_angle=90.0,
                 rotation_duration=2.0,
             ),
@@ -73,6 +85,9 @@ class Labyrinti(Node):
             Section(
                 distance=0.456,
                 move_duration=3.0,
+                expected_us_fwd=None,
+                expected_us_left=None,
+                expected_us_right=None,
                 rotation_angle=90.0,
                 rotation_duration=2.0,
             ),
@@ -80,6 +95,9 @@ class Labyrinti(Node):
             Section(
                 distance=0.775,
                 move_duration=4.0,
+                expected_us_fwd=None,
+                expected_us_left=None,
+                expected_us_right=None,
                 rotation_angle=-90.0,
                 rotation_duration=2.0,
             ),
@@ -87,6 +105,9 @@ class Labyrinti(Node):
             Section(
                 distance=1.375,
                 move_duration=5.0,
+                expected_us_fwd=None,
+                expected_us_left=None,
+                expected_us_right=None,
                 rotation_angle=-180.0,
                 rotation_duration=4.0,
             ),
@@ -94,6 +115,9 @@ class Labyrinti(Node):
             Section(
                 distance=0.55,
                 move_duration=3.0,
+                expected_us_fwd=None,
+                expected_us_left=None,
+                expected_us_right=None,
                 rotation_angle=90.0,
                 rotation_duration=2.0,
             ),
@@ -101,6 +125,9 @@ class Labyrinti(Node):
             Section(
                 distance=0.65,
                 move_duration=3.0,
+                expected_us_fwd=None,
+                expected_us_left=None,
+                expected_us_right=None,
                 rotation_angle=90.0,
                 rotation_duration=2.0,
             ),
@@ -108,6 +135,9 @@ class Labyrinti(Node):
             Section(
                 distance=0.475,
                 move_duration=3.0,
+                expected_us_fwd=None,
+                expected_us_left=None,
+                expected_us_right=None,
                 rotation_angle=75.0,
                 rotation_duration=2.0,
             ),
@@ -115,10 +145,13 @@ class Labyrinti(Node):
             Section(
                 distance=0.415,
                 move_duration=3.0,
+                expected_us_fwd=None,
+                expected_us_left=None,
+                expected_us_right=None,
                 rotation_angle=105.0,
                 rotation_duration=2.0,
             ),
-        ]
+        ])
 
         self.switch_state("MOVE")
 
@@ -153,6 +186,7 @@ class Labyrinti(Node):
 
     def update(self):
         self.update_any()
+        self.get_logger().info(f"update: state={self.state}")
 
         if self.state == "MOVE":
             return self.update_move()
