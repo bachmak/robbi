@@ -10,18 +10,18 @@ from std_msgs.msg import String
 @dataclass
 class Section:
     distance: float
+    move_duration: float
     expected_us_fwd: float # can be None
     expected_us_left: float # can be None
     expected_us_right: float # can be None
     rotation_angle: float
+    rotation_duration: float
 
 class Labyrinti(Node):
     def __init__(self):
         super().__init__('labyrinthi')
 
         # Constants
-        self.move_speed = 0.1 # m/sec
-        self.rotate_speed = 45 # deg/sec
         self.wait_duration = 0.5 # sec
         range_topic = '/sensi/us'
         cmd_action_topic = '/robot/cmd_action'
@@ -41,17 +41,83 @@ class Labyrinti(Node):
         self.action_pub = self.create_publisher(String, cmd_action_topic, 10)
 
         self.sections = deque[
-            Section(2.60,  rotation_angle=-90.0),  # 1
-            Section(0.98,  rotation_angle=-90.0),  # 2
-            Section(0.75,  rotation_angle=-90.0),  # 3
-            Section(0.70,  rotation_angle=90.0),   # 4
-            Section(0.456, rotation_angle=90.0),   # 5
-            Section(0.775, rotation_angle=-90.0),  # 6
-            Section(1.375, rotation_angle=-180.0), # 7
-            Section(0.55,  rotation_angle=90.0),   # 8
-            Section(0.65,  rotation_angle=90.0),   # 9
-            Section(0.475, rotation_angle=75.0),   # 10
-            Section(0.415, rotation_angle=105.0),  # 11
+            # 1
+            Section(
+                distance=2.60,
+                move_duration=10.0,
+                rotation_angle=-90.0,
+                rotation_duration=2.0,
+            ),
+            # 2
+            Section(
+                distance=0.98,
+                move_duration=5.0,
+                rotation_angle=-90.0,
+                rotation_duration=2.0,
+            ),
+            # 3
+            Section(
+                distance=0.75,
+                move_duration=4.0,
+                rotation_angle=-90.0,
+                rotation_duration=2.0,
+            ),
+            # 4
+            Section(
+                distance=0.70,
+                move_duration=4.0,
+                rotation_angle=90.0,
+                rotation_duration=2.0,
+            ),
+            # 5
+            Section(
+                distance=0.456,
+                move_duration=3.0,
+                rotation_angle=90.0,
+                rotation_duration=2.0,
+            ),
+            # 6
+            Section(
+                distance=0.775,
+                move_duration=4.0,
+                rotation_angle=-90.0,
+                rotation_duration=2.0,
+            ),
+            # 7
+            Section(
+                distance=1.375,
+                move_duration=5.0,
+                rotation_angle=-180.0,
+                rotation_duration=4.0,
+            ),
+            # 8
+            Section(
+                distance=0.55,
+                move_duration=3.0,
+                rotation_angle=90.0,
+                rotation_duration=2.0,
+            ),
+            # 9
+            Section(
+                distance=0.65,
+                move_duration=3.0,
+                rotation_angle=90.0,
+                rotation_duration=2.0,
+            ),
+            # 10
+            Section(
+                distance=0.475,
+                move_duration=3.0,
+                rotation_angle=75.0,
+                rotation_duration=2.0,
+            ),
+            # 11
+            Section(
+                distance=0.415,
+                move_duration=3.0,
+                rotation_angle=105.0,
+                rotation_duration=2.0,
+            ),
         ]
 
         self.switch_state("MOVE")
@@ -103,8 +169,10 @@ class Labyrinti(Node):
 
     def enter_move(self):
         self.current_section = self.sections.popleft()
-        duration = self.current_section.distance / self.move_speed
-        self.cmd_move(self.current_section.distance, duration)
+        self.cmd_move(
+            self.current_section.distance,
+            self.current_section.move_duration,
+        )
     
 
     def update_move(self):
@@ -115,8 +183,10 @@ class Labyrinti(Node):
     
 
     def enter_rotate(self):
-        duration = self.current_section.rotation_angle / self.rotate_speed
-        self.cmd_rotate(self.current_section.rotation_angle, duration)
+        self.cmd_rotate(
+            self.current_section.rotation_angle,
+            self.current_section.rotation_duration,
+        )
     
 
     def update_rotate(self):
