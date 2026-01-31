@@ -171,7 +171,7 @@ auto PositionControl::calc_pwm(Us dt, Degree position) const -> CalcPwmResult {
     return {pwm_ff + pwm_correction, false};
   }();
 
-  if (settings_.log) {
+  if (settings_.log && !completed_) {
     log(settings_.name, "pos-ctl",                                 //
         dt, err.v, position,                                       //
         target_distance_.v, setpoint_distance.v,                   //
