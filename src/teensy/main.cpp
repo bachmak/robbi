@@ -11,6 +11,18 @@
 #include "utils/io.h"
 #include "utils/time.h"
 
+constexpr auto left_pwm_fwd = 1531;
+constexpr auto left_pwm_bwd = 1484;
+constexpr auto left_pwm_stop = left_pwm_bwd + (left_pwm_fwd - left_pwm_bwd) / 2;
+constexpr auto left_pwm_deadband_fwd = left_pwm_fwd - left_pwm_stop;
+constexpr auto left_pwm_deadband_bwd = left_pwm_stop - left_pwm_bwd;
+
+constexpr auto right_pwm_fwd = 1530;
+constexpr auto right_pwm_bwd = 1486;
+constexpr auto right_pwm_stop = right_pwm_bwd + (right_pwm_fwd - right_pwm_bwd) / 2;
+constexpr auto right_pwm_deadband_fwd = right_pwm_fwd - right_pwm_stop;
+constexpr auto right_pwm_deadband_bwd = right_pwm_stop - right_pwm_bwd;
+
 struct Config {
   utils::io::Settings io_setings{
       .serial_baud = 115200,
@@ -24,21 +36,28 @@ struct Config {
           {
               .motor =
                   {
-                      // pwm deadband: fwd = 1530, bwd = 1486
                       .name = "left",
                       .control_pin = Pin{5},
                       .feedback_pin = Pin{6},
+                      .feedback_pwm_duty_cycle_min = 0.0288f,
+                      .feedback_pwm_duty_cycle_max = 0.9712f,
+                      .pwm_stop = Pwm{left_pwm_stop},
+                      .pwm_deadband_fwd = Pwm{left_pwm_deadband_fwd},
+                      .pwm_deadband_bwd = Pwm{left_pwm_deadband_bwd},
                   },
           },
       .right =
           {
               .motor =
                   {
-                      // pwm deadband: fwd = 1530, bwd = 1488
                       .name = "right",
                       .control_pin = Pin{7},
                       .feedback_pin = Pin{8},
-                      .pwm_deadband_bwd = Pwm{20},
+                      .feedback_pwm_duty_cycle_min = 0.0286f,
+                      .feedback_pwm_duty_cycle_max = 0.9714f,
+                      .pwm_stop = Pwm{right_pwm_stop},
+                      .pwm_deadband_fwd = Pwm{right_pwm_deadband_fwd},
+                      .pwm_deadband_bwd = Pwm{right_pwm_deadband_bwd},
                   },
           },
   };
