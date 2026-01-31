@@ -11,9 +11,6 @@ from std_msgs.msg import String
 class Section:
     distance: float
     move_duration: float
-    expected_us_fwd: float # can be None
-    expected_us_left: float # can be None
-    expected_us_right: float # can be None
     rotation_angle: float
     rotation_duration: float
 
@@ -48,9 +45,6 @@ class Labyrinti(Node):
             Section(
                 distance=2.595,
                 move_duration=10.0,
-                expected_us_fwd=None,
-                expected_us_left=None,
-                expected_us_right=None,
                 rotation_angle=adjusted_neg_90,
                 rotation_duration=2.0,
             ),
@@ -58,9 +52,6 @@ class Labyrinti(Node):
             Section(
                 distance=0.96,
                 move_duration=6.0,
-                expected_us_fwd=None,
-                expected_us_left=None,
-                expected_us_right=None,
                 rotation_angle=adjusted_neg_90,
                 rotation_duration=2.0,
             ),
@@ -68,9 +59,6 @@ class Labyrinti(Node):
             Section(
                 distance=0.75,
                 move_duration=5.5,
-                expected_us_fwd=None,
-                expected_us_left=None,
-                expected_us_right=None,
                 rotation_angle=adjusted_neg_90,
                 rotation_duration=2.0,
             ),
@@ -78,9 +66,6 @@ class Labyrinti(Node):
             Section(
                 distance=0.70,
                 move_duration=5.0,
-                expected_us_fwd=None,
-                expected_us_left=None,
-                expected_us_right=None,
                 rotation_angle=90.0,
                 rotation_duration=2.0,
             ),
@@ -88,9 +73,6 @@ class Labyrinti(Node):
             Section(
                 distance=0.45,
                 move_duration=4.0,
-                expected_us_fwd=None,
-                expected_us_left=None,
-                expected_us_right=None,
                 rotation_angle=90.0,
                 rotation_duration=2.0,
             ),
@@ -98,9 +80,6 @@ class Labyrinti(Node):
             Section(
                 distance=0.775,
                 move_duration=5.5,
-                expected_us_fwd=None,
-                expected_us_left=None,
-                expected_us_right=None,
                 rotation_angle=adjusted_neg_90,
                 rotation_duration=2.0,
             ),
@@ -108,9 +87,6 @@ class Labyrinti(Node):
             Section(
                 distance=1.375,
                 move_duration=7.5,
-                expected_us_fwd=None,
-                expected_us_left=None,
-                expected_us_right=None,
                 rotation_angle=adjusted_180,
                 rotation_duration=4.0,
             ),
@@ -118,9 +94,6 @@ class Labyrinti(Node):
             Section(
                 distance=0.55,
                 move_duration=5.0,
-                expected_us_fwd=None,
-                expected_us_left=None,
-                expected_us_right=None,
                 rotation_angle=90.0,
                 rotation_duration=2.0,
             ),
@@ -128,9 +101,6 @@ class Labyrinti(Node):
             Section(
                 distance=0.65,
                 move_duration=5.0,
-                expected_us_fwd=None,
-                expected_us_left=None,
-                expected_us_right=None,
                 rotation_angle=90.0,
                 rotation_duration=2.0,
             ),
@@ -138,15 +108,13 @@ class Labyrinti(Node):
             Section(
                 distance=0.475,
                 move_duration=5.0,
-                expected_us_fwd=None,
-                expected_us_left=None,
-                expected_us_right=None,
                 rotation_angle=adjusted_180,
                 rotation_duration=4.0,
             ),
         ])
 
         self.switch_state("MOVE")
+        time.sleep(1) # time for initialization
 
 
     def on_range(self, msg):
