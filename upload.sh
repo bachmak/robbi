@@ -90,6 +90,7 @@ fi
 if $DEPLOY_PYTHON; then
     echo "Uploading Python files..."
     declare -A PY_FILES=(
+        ["ros_nodes/labyrinthi.py"]="/home/pi/lab_6/ros_ws/src/labyrinthi/labyrinthi/labyrinthi.py"
         ["ros_nodes/long_runny.py"]="/home/pi/lab_6/ros_ws/src/long_runny/long_runny/long_runny.py"
         ["ros_nodes/randi.py"]="/home/pi/lab_6/ros_ws/src/randi/randi/randi.py"
         ["ros_nodes/robbi.py"]="/home/pi/lab_6/ros_ws/src/robbi/robbi/robbi.py"
