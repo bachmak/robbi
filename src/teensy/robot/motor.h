@@ -24,7 +24,7 @@ public:
   void set_target_distance(Degree distance, Us duration);
   void set_stop(bool value);
 
-  void configure(std::string_view setting, float value);
+  void set_settings(const MotorSettings &settings);
 
 private:
   using State = std::variant<states::VelocityControl, states::PositionControl>;
@@ -32,7 +32,6 @@ private:
   State state_;
   MotorSettings settings_;
   Servo servo_;
-  std::optional<Pwm> pwm_override_;
   bool stop_ = false;
 };
 } // namespace robot

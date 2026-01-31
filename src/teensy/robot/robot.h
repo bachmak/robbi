@@ -18,7 +18,8 @@ public:
   void set_target_rotation(Degree rotation, Us duration);
   void set_stop(bool value);
 
-  void configure(std::string_view setting, float value);
+  bool set_setting(std::string_view setting, float value);
+  std::optional<float> get_setting(std::string_view setting) const;
 
 private:
   RobotSettings settings_;

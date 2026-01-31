@@ -2,7 +2,8 @@
 
 #include "types.h"
 
-#include <string>
+#include <optional>
+#include <string_view>
 
 namespace robot {
 
@@ -39,12 +40,19 @@ struct MotorSettings {
   float trajectory_fall_rate = 200.0f;
 
   bool log = true;
+  Pwm pwm_override = Pwm{0}; // no override by default
 };
 
+bool set(MotorSettings &settings, std::string_view s, float value);
+std::optional<float> get(const MotorSettings &settings, std::string_view s);
+
 struct WheelSettings {
-  robot::MotorSettings motor = {};
+  MotorSettings motor = {};
   Meter radius = Meter{0.033};
 };
+
+bool set(WheelSettings &settings, std::string_view s, float value);
+std::optional<float> get(const WheelSettings &settings, std::string_view s);
 
 struct RobotSettings {
   WheelSettings left;
@@ -53,4 +61,7 @@ struct RobotSettings {
   Meter width = Meter{0.1005};
   Ms delay{0};
 };
+
+bool set(RobotSettings &settings, std::string_view s, float value);
+std::optional<float> get(const RobotSettings &settings, std::string_view s);
 } // namespace robot

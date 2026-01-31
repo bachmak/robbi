@@ -108,33 +108,14 @@ void Robot::set_stop(bool value) {
   right_.set_stop(value);
 }
 
-void Robot::configure(std::string_view setting, float value) {
-  using utils::str::substr_after;
+bool Robot::set_setting(std::string_view setting, const float value) {
+  auto result = set(settings_, setting, value);
+  left_.set_settings(settings_.left.motor);
+  right_.set_settings(settings_.right.motor);
+  return result;
+}
 
-  auto configure_wheel = [&](WheelSettings &settings, robot::Motor &motor,
-                             std::string_view subsetting) {
-    if (auto motor_setting = substr_after(subsetting, "motor.")) {
-      return motor.configure(*motor_setting, value);
-    }
-    if (subsetting == "radius") {
-      settings.radius = Meter{value};
-    }
-  };
-
-  if (auto subsetting = utils::str::substr_after(setting, "left.")) {
-    configure_wheel(settings_.left, left_, *subsetting);
-  } else if (auto subsetting = utils::str::substr_after(setting, "right.")) {
-    configure_wheel(settings_.right, right_, *subsetting);
-  } else if (setting == "width") {
-    settings_.width = Meter{value};
-  } else if (setting == "delay") {
-    settings_.delay = Ms{static_cast<int>(value)};
-  } else if (setting == "speed") {
-    auto speed = DegSec{value};
-    left_.set_target_speed(speed);
-    right_.set_target_speed(-speed);
-  } else {
-    utils::io::error("Robot: unknown setting: %s", setting.data());
-  }
+std::optional<float> Robot::get_setting(std::string_view setting) const {
+  return get(settings_, setting);
 }
 } // namespace robot

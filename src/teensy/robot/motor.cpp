@@ -51,8 +51,8 @@ void Motor::update(Us dt) {
     if (stop_) {
       return settings_.pwm_stop;
     }
-    if (pwm_override_.has_value()) {
-      return *pwm_override_;
+    if (settings_.pwm_override > 0) {
+      return settings_.pwm_override;
     }
 
     const auto pwm_clamped = std::clamp(pwm, settings_.pwm_min, settings_.pwm_max);
@@ -85,58 +85,8 @@ void Motor::set_target_distance(Degree target_distance, Us duration) {
 
 void Motor::set_stop(bool value) { stop_ = value; }
 
-void Motor::configure(std::string_view s, float value) {
-  const auto pwm = Pwm{value};
-
-  if (s == "speed") {
-    if (auto state = std::get_if<states::VelocityControl>(&state_)) {
-      state->set_target_speed(DegSec{value});
-    }
-    return;
-  }
-  if (s == "pwm-override") {
-    pwm_override_ = pwm == 0 ? std::optional<Pwm>{} : std::optional<Pwm>{pwm};
-    return;
-  }
-
-  if (s == "ramp-rise-rate") {
-    settings_.ramp_rise_rate = value;
-  } else if (s == "ramp-fall-rate") {
-    settings_.ramp_fall_rate = value;
-  } else if (s == "trajectory-rise-rate") {
-    settings_.trajectory_rise_rate = value;
-  } else if (s == "trajectory-fall-rate") {
-    settings_.trajectory_fall_rate = value;
-  } else if (s == "speed-filter-alpha") {
-    settings_.speed_filter_alpha = value;
-  } else if (s == "fb-pwm-min") {
-    settings_.feedback_pwm_min = pwm;
-  } else if (s == "fb-pwm-max") {
-    settings_.feedback_pwm_max = pwm;
-  } else if (s == "pwm-min") {
-    settings_.pwm_min = pwm;
-  } else if (s == "pwm-max") {
-    settings_.pwm_max = pwm;
-  } else if (s == "pwm-stop") {
-    settings_.pwm_stop = pwm;
-  } else if (s == "pwm-deadband-fwd") {
-    settings_.pwm_deadband_fwd = pwm;
-  } else if (s == "pwm-deadband-bwd") {
-    settings_.pwm_deadband_bwd = pwm;
-  } else if (s == "ff-gain-fwd") {
-    settings_.ff_gain_fwd = value;
-  } else if (s == "ff-gain-bwd") {
-    settings_.ff_gain_bwd = value;
-  } else if (s == "g-vel") {
-    settings_.G_vel = value;
-  } else if (s == "g-pos") {
-    settings_.G_pos = value;
-  } else if (s == "log") {
-    settings_.log = value != 0.0f;
-  } else {
-    utils::io::error("Motor: unknown settins: %s", s.data());
-  }
-
-  std::visit([this](auto &state) { state.set_settings(settings_); }, state_);
+void Motor::set_settings(const MotorSettings &settings) {
+  settings_ = settings;
+  std::visit([&](auto &state) { state.set_settings(settings); }, state_);
 }
 } // namespace robot

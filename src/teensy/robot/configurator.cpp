@@ -7,38 +7,47 @@
 namespace robot {
 namespace {
 
+constexpr auto header = std::string_view{"RobotConfiguration"};
+
 struct ConfigCommand {
   std::string_view setting;
   float value;
 };
 
-std::optional<ConfigCommand> process_command(Configurator &configurator, std::string_view str) {
-  utils::io::info("RobotConfiguration: received message: %.*s", static_cast<int>(str.size()),
-                  str.data());
+void process_command(Robot &robot, std::string_view str) {
+  utils::io::info("%s: received message: %s", header.data(), str.data());
 
   const auto tokens = utils::str::split(str);
   if (tokens.size() != 2) {
-    return {};
+    return;
   }
 
   const auto setting = tokens[0];
-  const auto value = utils::str::to_float(tokens[1]);
-  if (!value.has_value()) {
-    return {};
+  if (tokens[1] == "get") {
+    if (const auto value = robot.get_setting(setting)) {
+      utils::io::info("%s: get %s = %f", header.data(), setting.data(), *value);
+      return;
+    }
+    utils::io::info("%s: no such setting: %s", header.data(), setting.data());
+    return;
   }
 
-  utils::io::info("RobotConfiguration: applying setting: %.*s = %f",
-                  static_cast<int>(setting.size()), setting.data(), *value);
+  const auto value = utils::str::to_float(tokens[1]);
+  if (!value.has_value()) {
+    utils::io::info("%s: invalid value for %s", header.data(), setting.data());
+    return;
+  }
 
-  return ConfigCommand{setting, *value};
+  if (robot.set_setting(setting, *value)) {
+    utils::io::info("%s: applied setting: %s = %f", header.data(), setting.data(), *value);
+    return;
+  }
+  utils::io::info("%s: no such setting: %s", header.data(), setting.data());
 }
 } // namespace
 
 Configurator::Configurator(Robot &robot, ros::Node &node, std::string_view topic_name)
     : robot_(robot), //
-      subscription_(node, topic_name.data(), [this](std::string_view str) {
-        if (auto cmd = process_command(*this, str); cmd.has_value()) {
-          robot_.configure(cmd->setting, cmd->value);
-        }
-      }) {}
+      subscription_(node, topic_name.data(),
+                    [this](std::string_view str) { process_command(robot_, str); }) {}
 } // namespace robot
