@@ -28,39 +28,34 @@ class Labyrinti(Node):
 
         # State
         self.state = None
-        self.us_measurements = { "angle_0": None, "angle_90": None, "angle_180": None }
         self.current_section = None
         self.curr_state_time = None
         self.last_log_time = time.time()
 
         # ROS2 entities
-        self.create_subscription(Range, range_topic, self.on_range, 10)
         self.create_timer(update_interval, self.update)
         self.action_pub = self.create_publisher(String, cmd_action_topic, 10)
-
-        adjusted_neg_90 = -89.67
-        adjusted_180 = 182.0
 
         self.sections = deque([
             # 1
             Section(
                 distance=2.595,
                 move_duration=10.0,
-                rotation_angle=adjusted_neg_90,
+                rotation_angle=91.2,
                 rotation_duration=2.0,
             ),
             # 2
             Section(
                 distance=0.96,
                 move_duration=6.0,
-                rotation_angle=adjusted_neg_90,
+                rotation_angle=91.2,
                 rotation_duration=2.0,
             ),
             # 3
             Section(
                 distance=0.75,
                 move_duration=5.5,
-                rotation_angle=adjusted_neg_90,
+                rotation_angle=91.2,
                 rotation_duration=2.0,
             ),
             # 4
@@ -81,14 +76,14 @@ class Labyrinti(Node):
             Section(
                 distance=0.775,
                 move_duration=5.5,
-                rotation_angle=adjusted_neg_90,
+                rotation_angle=91.2,
                 rotation_duration=2.0,
             ),
             # 7
             Section(
                 distance=1.375,
                 move_duration=7.5,
-                rotation_angle=adjusted_180,
+                rotation_angle=182.0,
                 rotation_duration=4.0,
             ),
             # 8
@@ -114,18 +109,9 @@ class Labyrinti(Node):
             ),
         ])
 
-        self.switch_state("MOVE")
         time.sleep(1) # time for initialization
+        self.switch_state("MOVE")
 
-
-    def on_range(self, msg):
-        if self.state != "WAIT":
-            return
-
-        fid = msg.header.frame_id
-        if fid in self.us_measurements:
-            self.us_measurements[fid] = msg.range
-    
 
     def switch_state(self, state):
         self.state = state
@@ -140,8 +126,6 @@ class Labyrinti(Node):
 
 
     def update(self):
-        self.update_any()
-
         # Periodic logging based on logging_interval
         current_time = time.time()
         if current_time - self.last_log_time >= self.logging_interval:
@@ -155,11 +139,6 @@ class Labyrinti(Node):
         if self.state == "WAIT":
             return self.update_wait()
     
-
-    def update_any(self):
-        if any(v and v[-1].value < 0.05 for v in self.us_measurements.values()):
-            self.switch_state("STOP")
-
 
     def enter_move(self):
         self.current_section = self.sections.popleft()
@@ -193,7 +172,7 @@ class Labyrinti(Node):
 
 
     def enter_wait(self):
-        self.ranges = { "angle_0": None, "angle_90": None, "angle_180": None }
+        return
 
 
     def update_wait(self):

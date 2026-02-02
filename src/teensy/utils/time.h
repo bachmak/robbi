@@ -29,26 +29,6 @@ private:
   StopWatch stop_watch;
 };
 
-class LoopStopWatch {
-public:
-  Ms tick(Ms curr = Ms{millis()}) {
-    auto loop = curr - last;
-    common += loop;
-    iterations++;
-    last = curr;
-    return loop;
-  }
-
-  Ms average() const {
-    return Ms{static_cast<int>(static_cast<double>(common.count()) / iterations)};
-  }
-
-private:
-  Ms last = Ms{millis()};
-  Ms common = Ms{0};
-  int iterations = 0;
-};
-
 inline float to_sec(Us t) {
   using R = std::ratio_divide<Us::period, Sec::period>;
   constexpr auto num = R::num;
