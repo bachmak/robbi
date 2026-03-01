@@ -19,11 +19,12 @@ using Executable = std::variant<Timer *, SubscriptionBase *>;
 
 class Executor {
 public:
-  NON_COPYABLE(Executor)
-
-  Executor(Support &support, std::vector<Executable> executables);
+  explicit Executor(Support &support, std::vector<Executable> executables);
   ~Executor();
 
+  NON_COPYABLE(Executor)
+
+public:
   void spin_some(Ns timeout);
 
 private:

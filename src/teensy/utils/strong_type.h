@@ -43,18 +43,6 @@ template <typename T, typename Tag> struct StrongType {
   friend bool operator<=(Self a, T b) { return a.v <= b; }
   friend bool operator>=(Self a, T b) { return a.v >= b; }
 
-  Self &operator+=(Self b) { return (v += b.v, *this); }
-  Self &operator-=(Self b) { return (v -= b.v, *this); }
-  Self &operator*=(Self b) { return (v *= b.v, *this); }
-  Self &operator/=(Self b) { return (v /= b.v, *this); }
-  Self &operator%=(Self b) { return (v %= b.v, *this); }
-
-  Self &operator+=(T b) { return (v += b, *this); }
-  Self &operator-=(T b) { return (v -= b, *this); }
-  Self &operator*=(T b) { return (v *= b, *this); }
-  Self &operator/=(T b) { return (v /= b, *this); }
-  Self &operator%=(T b) { return (v %= b, *this); }
-
   friend Self abs(Self a) { return Self{std::abs(a.v)}; }
 };
 } // namespace utils::strong_type

@@ -14,10 +14,12 @@ namespace ros {
 
 class Support {
 public:
-  NON_COPYABLE(Support)
-  Support();
+  explicit Support();
   ~Support();
 
+  NON_COPYABLE(Support)
+
+public:
   void init(rcl_node_t &node, std::string_view name);
   void init(rcl_timer_t &timer, int64_t timeout_ns, rcl_timer_callback_t callback);
   void init(rclc_executor_t &executor, size_t num_handles);

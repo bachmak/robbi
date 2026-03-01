@@ -14,13 +14,15 @@ class Support;
 
 class Timer {
 public:
-  NON_COPYABLE(Timer)
-
   using Callback = std::function<void(int64_t)>;
 
-  Timer(Support &support, Ns period, Callback callback);
+public:
+  explicit Timer(Support &support, Ns period, Callback callback);
   ~Timer();
 
+  NON_COPYABLE(Timer)
+
+public:
   rcl_timer_t &impl() { return impl_; }
 
 private:

@@ -10,6 +10,7 @@ void crash_report();
 class Blinker {
 public:
   explicit Blinker(Pin pin);
+  ~Blinker() = default;
 
   NON_COPYABLE(Blinker)
 

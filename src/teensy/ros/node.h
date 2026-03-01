@@ -14,9 +14,10 @@ class Support;
 
 class Node {
 public:
-  Node(Support &support, std::string_view name);
+  explicit Node(Support &support, std::string_view name);
   NON_COPYABLE(Node)
 
+public:
   void init(rcl_publisher_t &publisher, std::string_view topic_name,
             const rosidl_message_type_support_t *type_support);
   void init(rcl_subscription_t &subscription, std::string_view topic_name,

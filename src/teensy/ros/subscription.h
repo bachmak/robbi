@@ -13,13 +13,16 @@ class Node;
 
 class SubscriptionBase {
 public:
-  NON_COPYABLE(SubscriptionBase)
   using Callback = std::function<void(const void *)>;
 
+public:
   SubscriptionBase(Node &node, std::string_view topic_name, void *message,
                    const rosidl_message_type_support_t *type_support, Callback callback);
   ~SubscriptionBase();
 
+  NON_COPYABLE(SubscriptionBase)
+
+public:
   rcl_subscription_t &impl() { return impl_; }
   void *msg() { return message_; }
   void on_message(const void *message);

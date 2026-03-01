@@ -46,8 +46,7 @@ void info(const char *format, ...);
 void warning(const char *format, ...);
 void error(const char *format, ...);
 
-class StringPrint : public Print {
-public:
+struct StringPrint : Print {
   std::string buffer;
 
   size_t write(uint8_t b) override {

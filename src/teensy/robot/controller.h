@@ -8,8 +8,8 @@ class Robot;
 
 class Controller {
 public:
-  Controller(Robot &robot, ros::Node &node, std::string_view cmd_vel_topic,
-             std::string_view cmd_action_topic);
+  explicit Controller(Robot &robot, ros::Node &node, std::string_view cmd_vel_topic,
+                      std::string_view cmd_action_topic);
 
   auto &cmd_vel_subscription() { return cmd_vel_subscription_; }
   auto &cmd_action_subscription() { return cmd_action_subscription_; }

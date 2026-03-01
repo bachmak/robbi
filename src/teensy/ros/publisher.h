@@ -9,16 +9,18 @@ namespace ros {
 
 template <typename T> class Publisher {
 public:
-  NON_COPYABLE(Publisher)
+  using Traits = MessageTraits<T>;
 
+public:
   Publisher(Node &node, std::string_view topic_name) : impl_(), node_(node) {
     node_.init(impl_, topic_name, Traits::get_type_support());
   }
 
   ~Publisher() { node_.finalize(impl_); }
 
-  using Traits = MessageTraits<T>;
+  NON_COPYABLE(Publisher)
 
+public:
   void publish(const T &data) {
     auto message = Traits::to_message(data);
     ROS_CHECK_ERR(rcl_publish(&impl_, &message, nullptr));

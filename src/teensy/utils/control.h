@@ -9,7 +9,9 @@ namespace utils::control {
 
 class Ramp {
 public:
-  Ramp(float rise_rate, float fall_rate);
+  explicit Ramp(float rise_rate, float fall_rate);
+
+public:
   float update(float target, float dt);
 
   void reset(float v);
@@ -34,6 +36,7 @@ class TrajectoryFollower {
 public:
   explicit TrajectoryFollower(const Trajectory &trajectory);
 
+public:
   void update(float dt);
 
   float value() const { return value_; }

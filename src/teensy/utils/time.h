@@ -8,6 +8,7 @@ class StopWatch {
 public:
   explicit StopWatch(Ms start = Ms{millis()}) : start(start) {}
 
+public:
   Ms time_passed(Ms curr = Ms{millis()}) const { return curr - start; }
 
   void reset(Ms curr = Ms{millis()}) { start = curr; }
@@ -20,6 +21,7 @@ class Timer {
 public:
   explicit Timer(Ms duration, Ms start = Ms{millis()}) : duration(duration), stop_watch(start) {}
 
+public:
   bool is_over(Ms curr = Ms{millis()}) const { return stop_watch.time_passed(curr) > duration; }
 
   void reset(Ms curr = Ms{millis()}) { stop_watch.reset(curr); }
